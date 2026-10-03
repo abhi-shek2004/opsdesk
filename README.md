@@ -4,6 +4,8 @@ An internal web app for coordinating operational work: customer issues, incident
 
 **Stack:** React 19 + TanStack Query + Tailwind (web) · Node + Fastify + TypeScript (API and worker) · PostgreSQL.
 
+**Live demo:** https://opsdesk-gb7f.onrender.com. Sign in with any demo account below. It runs on a free instance, so the first request after 15 idle minutes takes about a minute to wake it.
+
 ---
 
 ## Run it
