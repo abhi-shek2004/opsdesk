@@ -37,7 +37,7 @@ All demo accounts use the password **`password123`**. The login page also has on
 Other commands:
 
 ```bash
-npm test             # 47 API tests (real Postgres) + 8 frontend tests
+npm test             # 48 API tests (real Postgres) + 8 frontend tests
 npm run typecheck
 npm run seed         # wipe and re-seed demo data (stop `npm run dev` first or run alongside)
 npm run build && npm start   # production build served by the API on :4000
@@ -152,7 +152,7 @@ The tests target the behaviours that would be most dangerous if wrong, and they 
 |---|---|
 | `api/tests/concurrency.test.ts` | 12 parallel claims → exactly 1 owner and 1 history entry; N parallel edits from one version → exactly 1 applied; idempotent create under 8 concurrent duplicates → 1 item; key reuse with a different body → 422; simultaneous approve and reject → one decision; 15 concurrent creates → unique, gap-free keys |
 | `api/tests/authorization.test.ts` | 401s, login lockout after repeated failures, logout and team removal take effect on the very next request, CSRF header, cross-team 404s, list/search isolation, viewer limits, member-vs-lead rules, assignees must be team members, **no self-approval (even admin)**, members can't waive approval, notifications are private |
-| `api/tests/workflow.test.ts` | every illegal transition rejected; approval gating; reasons required; reopen revokes approval; full lifecycle produces exact history; failed writes leave no events or jobs; DB constraint backstop; pagination visits every item exactly once; key and prefix search |
+| `api/tests/workflow.test.ts` | demo data never marks work overdue before its due date; every illegal transition rejected; approval gating; reasons required; reopen revokes approval; full lifecycle produces exact history; failed writes leave no events or jobs; DB constraint backstop; pagination visits every item exactly once; key and prefix search |
 | `api/tests/jobs.test.ts` | fan-out recipients; re-delivery doesn't double-notify; backoff then dead-letter without blocking other jobs; partial writes of a failed job roll back; 4 concurrent workers never double-process; SLA scan flags exactly once |
 | `web/src/api/hooks.test.tsx` | optimistic update → server result; rollback on 403; conflict adopts server copy and returns the user's change |
 | `web/src/lib/nextStep.test.ts` | the per-item "Next:" guidance (owner needed, approval needed, overdue, decision needed) |

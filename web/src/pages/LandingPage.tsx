@@ -17,7 +17,7 @@ const STATS = [
   { icon: '*', target: 1, suffix: '', decimals: 0, label: 'Owner per item, atomically' },
   { icon: '%', target: 100, suffix: '%', decimals: 0, label: 'Changes in the audit trail' },
   { icon: '<', target: 0, suffix: '', decimals: 0, label: 'Lost updates' },
-  { icon: '#', target: 55, suffix: '', decimals: 0, label: 'Automated safety tests' },
+  { icon: '#', target: 56, suffix: '', decimals: 0, label: 'Automated safety tests' },
 ];
 
 /** Shared full-bleed video backdrop + header used by the landing and sign-in pages. */

@@ -179,6 +179,14 @@ describe('listing at scale', () => {
     expect(total).toBe(60);
   });
 
+  it('seeded demo data never marks work as overdue before its due date', async () => {
+    const future = await pool.query(
+      `SELECT (SELECT count(*) FROM work_items WHERE sla_breached_at > now() OR (sla_breached_at IS NOT NULL AND due_at > now())) AS items,
+              (SELECT count(*) FROM activity_events WHERE created_at > now()) AS events`,
+    );
+    expect(future.rows[0]).toEqual({ items: 0, events: 0 });
+  });
+
   it('search: an item key is an exact lookup; words match by prefix', async () => {
     const rahul = await login('rahul');
     const created = await createItem(rahul, { title: 'Reconcile settlement batch for Zenith' });

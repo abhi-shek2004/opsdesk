@@ -157,7 +157,8 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
     cols.approvedBy.push(it.approvedBy ?? null);
     cols.resolution.push(resolved ? pick(['Fixed and verified.', 'Refund processed.', 'Customer confirmed.', 'Config corrected.']) : null);
     cols.dueAt.push(it.dueAt ?? null);
-    cols.sla.push(it.sla && it.dueAt ? it.dueAt : null);
+    // Only work whose deadline has already passed is breached (the worker flags it at the due time).
+    cols.sla.push(it.sla && it.dueAt && it.dueAt.getTime() < now ? it.dueAt : null);
     cols.createdAt.push(it.createdAt);
     cols.updatedAt.push(updatedAt);
     cols.resolvedAt.push(resolved ? updatedAt : null);
