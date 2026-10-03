@@ -154,3 +154,45 @@ describe('item numbering under load', () => {
     expect(numbers[14] - numbers[0]).toBe(14);
   });
 });
+
+describe('burst of mixed updates (many users, one item, same moment)', () => {
+  it('serialises 50 concurrent operations with no lost update, no gap and no server error', async () => {
+    const [rahul, priya, alex, vera] = await Promise.all(['rahul', 'priya', 'alex', 'vera'].map(login));
+    const item = await createItem(priya, { title: 'Burst target' });
+    const url = `/api/items/${item.id}`;
+
+    const ops: Promise<{ status: number; body: any }>[] = [];
+    // 15 comments from everyone (viewers may comment): never conflict, never bump the version.
+    for (let i = 0; i < 15; i++) ops.push([rahul, priya, alex, vera][i % 4].request('POST', `${url}/comments`, { body: `c${i}` }));
+    // 15 priority edits by the lead, all based on the version she loaded: at most one may win.
+    for (let i = 0; i < 15; i++)
+      ops.push(priya.request('PATCH', url, { version: item.version, priority: i % 2 ? 'P1' : 'P2' }));
+    // 10 claims from two members: exactly one owner.
+    for (let i = 0; i < 10; i++) ops.push((i % 2 ? rahul : alex).request('POST', `${url}/claim`));
+    // 10 attempts by the lead to block it: legal only once it is in progress, and only once.
+    for (let i = 0; i < 10; i++)
+      ops.push(priya.request('POST', `${url}/transition`, { to: 'BLOCKED', reason: 'Waiting on bank' }));
+
+    const results = await Promise.all(ops);
+
+    // Every answer is a deliberate one: success, conflict or rule violation. Never a 5xx.
+    expect(results.every((r) => [200, 201, 409, 422].includes(r.status))).toBe(true);
+
+    // The versions handed back by successful item writes must form an unbroken sequence 1..final.
+    // A lost update or a double-applied write would show up as a gap or a duplicate bump.
+    const finalRow = (await pool.query('SELECT version, owner_id, status FROM work_items WHERE id = $1', [item.id]))
+      .rows[0];
+    const seen = new Set<number>([item.version]);
+    for (const r of results) if (r.status === 200 && typeof r.body?.version === 'number') seen.add(r.body.version);
+    expect([...seen].sort((a, b) => a - b)).toEqual(Array.from({ length: finalRow.version }, (_, i) => i + 1));
+
+    // History matches what actually happened, exactly once each.
+    const events = await eventsFor(item.id);
+    const count = (t: string) => events.filter((e) => e.type === t).length;
+    expect(count('COMMENTED')).toBe(15);
+    expect(count('ASSIGNED')).toBe(1);
+    expect(count('PRIORITY_CHANGED')).toBeLessThanOrEqual(1);
+    expect(finalRow.owner_id).not.toBeNull();
+    expect(['IN_PROGRESS', 'BLOCKED']).toContain(finalRow.status);
+  });
+});
