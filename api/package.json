@@ -1,0 +1,36 @@
+{
+  "name": "@opsdesk/api",
+  "version": "1.0.0",
+  "description": "OpsDesk API + worker",
+  "scripts": {
+    "db": "tsx scripts/local-db.ts",
+    "migrate": "tsx src/db/migrate.ts",
+    "seed": "tsx src/db/seed.ts",
+    "dev": "tsx watch src/server.ts",
+    "worker": "tsx watch src/jobs/run-worker.ts",
+    "start": "tsx src/server.ts",
+    "start:worker": "tsx src/jobs/run-worker.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "concurrently": "^10.0.5",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/static": "^10.1.5",
+    "bcryptjs": "^3.0.3",
+    "fastify": "^5.12.5",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
+  }
+}

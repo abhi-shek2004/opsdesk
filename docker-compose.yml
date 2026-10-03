@@ -1,0 +1,15 @@
+# Optional: use a Dockerized Postgres instead of the zero-install embedded one.
+#   docker compose up -d db
+#   DATABASE_URL=postgres://postgres:postgres@localhost:5432/opsdesk npm run seed
+#   DATABASE_URL=postgres://postgres:postgres@localhost:5432/opsdesk npm run dev:external-db
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: opsdesk
+    ports: ['5432:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+volumes:
+  pgdata:
