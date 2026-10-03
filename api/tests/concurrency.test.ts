@@ -163,7 +163,8 @@ describe('burst of mixed updates (many users, one item, same moment)', () => {
 
     const ops: Promise<{ status: number; body: any }>[] = [];
     // 15 comments from everyone (viewers may comment): never conflict, never bump the version.
-    for (let i = 0; i < 15; i++) ops.push([rahul, priya, alex, vera][i % 4].request('POST', `${url}/comments`, { body: `c${i}` }));
+    for (let i = 0; i < 15; i++)
+      ops.push([rahul, priya, alex, vera][i % 4].request('POST', `${url}/comments`, { body: `c${i}` }));
     // 15 priority edits by the lead, all based on the version she loaded: at most one may win.
     for (let i = 0; i < 15; i++)
       ops.push(priya.request('PATCH', url, { version: item.version, priority: i % 2 ? 'P1' : 'P2' }));
