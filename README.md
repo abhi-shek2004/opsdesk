@@ -2,219 +2,228 @@
 
 # OpsDesk
 
-**Coordinate operational work without losing it in chat.**
-Customer issues, incidents, payment investigations, compliance requests and approvals, each with a clear owner, a full history and safe behaviour when people act at the same moment.
+**Operational work coordination for teams that can't afford to lose a request.**
 
-### [▶ Open the live demo](https://opsdesk-gb7f.onrender.com)
+[![CI](https://img.shields.io/github/actions/workflow/status/abhi-shek2004/opsdesk/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/abhi-shek2004/opsdesk/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/tests-57%20passing-16a34a?style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%7C%2018-336791?style=flat-square&logo=postgresql&logoColor=white)
+![Node](https://img.shields.io/badge/Node.js-20%20%7C%2022-5fa04e?style=flat-square&logo=node.js&logoColor=white)
 
-[![Live demo](https://img.shields.io/badge/live%20demo-opsdesk--gb7f.onrender.com-4f46e5?style=for-the-badge)](https://opsdesk-gb7f.onrender.com)
-[![CI](https://img.shields.io/github/actions/workflow/status/abhi-shek2004/opsdesk/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/abhi-shek2004/opsdesk/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-57%20passing-16a34a?style=for-the-badge)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+[Live demo](https://opsdesk-gb7f.onrender.com) · [Engineering decisions](ENGINEERING_DECISIONS.md) · [Quick start](#quick-start) · [Configuration](#configuration)
 
-[Live demo](https://opsdesk-gb7f.onrender.com) · [Engineering decisions](ENGINEERING_DECISIONS.md) · [Review notes](DISCUSSION_NOTES.md) · [5-minute demo script](#a-5-minute-demo-script)
-
-<img src="docs/screenshots/landing.jpg" alt="OpsDesk landing page" width="900" />
+<img src="docs/screenshots/dashboard.png" alt="OpsDesk dashboard" width="900" />
 
 </div>
 
 ---
 
-## Try it in 30 seconds
+## Overview
 
-1. Open **https://opsdesk-gb7f.onrender.com** and click **Get Started**.
-2. Click any demo account. They all use the password **`password123`**.
-3. Open a second browser (or a private window) as another user to see live updates, claim races and approvals.
+OpsDesk replaces chat threads, spreadsheets and email as the place where teams track operational work: customer issues, incidents, payment investigations, compliance requests and approvals.
 
-The demo runs on a free instance: after 15 idle minutes, the first visit takes about a minute to wake it.
+Every work item has **exactly one owner**, a **status and priority**, a **complete, append-only history**, and a clear **next step**. The system is built to stay correct when many people act on the same work at the same time:
 
-| Account | Role(s) | Good for demoing |
-|---|---|---|
-| `priya@opsdesk.dev` | Payments **lead**, Compliance member | approving refunds |
-| `rahul@opsdesk.dev` | Payments + Operations member | owns `PAY-1`, requests approval |
-| `sam@opsdesk.dev` | Engineering **lead** | can't see Payments at all |
-| `alex@opsdesk.dev` | Engineering + Payments member | racing Rahul to claim |
-| `vera@opsdesk.dev` | **viewer** (read and comment only) | authorization |
-| `admin@opsdesk.dev` | global admin | team management, failed jobs |
+- simultaneous claims produce exactly one owner;
+- stale edits are rejected instead of silently overwriting someone else's;
+- retried requests never create duplicates;
+- approval rules are enforced by the server, not just hidden in the UI.
 
-## Screenshots
+## Features
 
-| Dashboard: what needs my attention | Item: next step, workflow, history |
+| Area | Capabilities |
 |---|---|
-| <img src="docs/screenshots/dashboard.png" alt="Dashboard" /> | <img src="docs/screenshots/item-detail.png" alt="Item detail" /> |
-| **Work items: filters, search, 1,000+ items** | **Approvals: lead sign-off queue** |
-| <img src="docs/screenshots/work-items.png" alt="Work items list" /> | <img src="docs/screenshots/approvals.png" alt="Approvals queue" /> |
+| **Work items** | Create (with duplicate detection), edit, claim, assign and release, comment, watch; human-readable keys such as `PAY-42` |
+| **Workflow** | Open → In progress ⇄ Blocked → Pending approval → Resolved → Closed (plus Cancelled); reasons and resolution notes required where it matters |
+| **Approvals** | Lead sign-off for payment and compliance work; separation of duties (no self-approval, including admins); approval queue |
+| **Visibility** | Dashboard of what needs attention; filterable, searchable work list with shareable URLs; per-item "Next" guidance; activity timeline |
+| **Collaboration** | Live updates over Server-Sent Events, in-app notifications, conflict resolution for concurrent edits |
+| **Access control** | Per-team roles (viewer, member, lead) and administrators, enforced on every request |
+| **Background processing** | Transactional outbox worker with retries, backoff, dead-lettering and idempotent handlers; SLA breach detection |
 
-## What it does
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/item-detail.png" alt="Work item with next step, workflow actions and history" /></td>
+    <td width="50%"><img src="docs/screenshots/work-items.png" alt="Filtered and searchable work list" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Work item: next step, workflow actions, ownership, history</sub></td>
+    <td align="center"><sub>Work list: filters, search, keyset pagination</sub></td>
+  </tr>
+</table>
 
-- **Work items with clear ownership.** What it is, why it exists, status, priority, owner, due date, and a "Next:" line saying what has to happen next.
-- **Teams and roles.** Viewer, member or lead per team, plus admins. Every permission is enforced by the server; the UI only hides buttons as a convenience.
-- **Workflow rules.** Open → In progress ⇄ Blocked → Pending approval → Resolved → Closed. Payment and compliance work can't be resolved without a lead's approval, and nobody can approve their own work.
-- **Full history.** Every change (owner, priority, status, approvals, edits, comments) is recorded in the same transaction as the change itself.
-- **Safe when people act at once.**
-  - Simultaneous claims: exactly one person wins, and the other is told who.
-  - Stale edits: a conflict dialog instead of a silent overwrite.
-  - Double-clicks and retries: they never create duplicates.
-- **Live updates.** You see teammates' changes as they happen, and get notifications for work you watch.
-- **Reliable background work.** Notifications and overdue checks run in a worker with retries, a dead-letter queue and duplicate protection.
-- **Built to grow.** Cursor pagination, indexed full-text search, and a dashboard that only touches active work. Seeded with 6,000 items and 22,000 history events.
+## Live demo
 
-**Stack:** React 19, TanStack Query and Tailwind (web) · Node, Fastify and TypeScript (API and worker) · PostgreSQL (data, job queue, live-update bus and search).
+**https://opsdesk-gb7f.onrender.com**. Every demo account uses the password `password123`, and the sign-in page offers one-click sign-in.
 
----
+| Account | Role | Useful for |
+|---|---|---|
+| `priya@opsdesk.dev` | Payments lead, Compliance member | Approvals and assignment |
+| `rahul@opsdesk.dev` | Payments and Operations member | Owns `PAY-1`; requests approval |
+| `alex@opsdesk.dev` | Engineering and Payments member | Concurrent claims with Rahul |
+| `sam@opsdesk.dev` | Engineering lead | Team isolation (cannot see Payments) |
+| `vera@opsdesk.dev` | Viewer | Read and comment only |
+| `admin@opsdesk.dev` | Administrator | Team membership; failed background jobs |
 
-## Run it locally
+> The demo runs on a free instance. After 15 minutes of inactivity the first request takes about a minute while it wakes. The demo accounts are public, so data may have been changed by other visitors.
 
-**Requirements:** Node.js 20+ and npm. Docker and a local Postgres are **not** required: an embedded PostgreSQL binary is downloaded via npm.
+## Quick start
+
+**Prerequisites:** Node.js 20 or newer, and npm. Docker and a local PostgreSQL are **not** required: an embedded PostgreSQL is installed through npm.
 
 ```bash
+git clone https://github.com/abhi-shek2004/opsdesk.git
+cd opsdesk
 npm install
 npm run dev
 ```
 
+Open **http://localhost:5173** and sign in with any demo account.
+
 `npm run dev` starts four processes:
-- **db:** PostgreSQL on port 54329, data kept in `./.pgdata`. On the very first run it creates the schema and seeds about 6,000 demo work items.
-- **api:** http://localhost:4000
-- **worker:** background jobs.
-- **web:** http://localhost:5173. Open this one.
 
-Sign in with any of the demo accounts above.
+| Process | Address | Purpose |
+|---|---|---|
+| `db` | `localhost:54329` | Embedded PostgreSQL (data in `./.pgdata`); creates the schema and seeds ~6,000 demo items on first run |
+| `api` | `localhost:4000` | HTTP API and live-update stream |
+| `worker` | n/a | Background jobs: notifications, SLA scan, cleanup |
+| `web` | `localhost:5173` | Vite dev server (proxies `/api` to the API) |
 
-Other commands:
+### Using your own PostgreSQL
 
 ```bash
-npm test             # 49 API tests (real Postgres) + 8 frontend tests
-npm run lint         # ESLint (zero warnings) · npm run format:check for Prettier
-npm run typecheck
-npm run seed         # wipe and re-seed demo data (stop `npm run dev` first or run alongside)
-npm run build && npm start   # production build served by the API on :4000
+docker compose up -d db          # or any PostgreSQL 15+
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/opsdesk
+npm run seed                     # schema + demo data (destructive)
+npm run dev:external-db
 ```
 
-To use your own Postgres instead, see `docker-compose.yml`. Set `DATABASE_URL` and run `npm run dev:external-db`.
+## Scripts
 
-### Deploying (Render)
-
-`render.yaml` describes the whole deployment: one web service, which serves the UI, the API and the background worker, plus a managed PostgreSQL database.
-
-1. Push this repository to GitHub.
-2. In Render, choose **New → Blueprint** and select the repository. Render creates the database and the service and deploys.
-3. On first boot the server runs migrations and loads the demo data.
-
-Production settings, all already set in `render.yaml`:
-
-| Setting | What it does |
+| Command | Description |
 |---|---|
-| `NODE_ENV=production` | login cookies are only sent over HTTPS |
-| `TRUST_PROXY=1` | the real client IP is used for login throttling |
-| `WORKER_IN_PROCESS=1` | the job loop runs inside the web process (the free plan has no separate workers) |
-| `SEED_DEMO_DATA=1` | an empty database gets the demo data |
+| `npm run dev` | Full local stack with hot reload |
+| `npm test` | API tests (real PostgreSQL) and web tests |
+| `npm run lint` | ESLint (zero-warning policy) |
+| `npm run format` / `npm run format:check` | Prettier |
+| `npm run typecheck` | TypeScript, API and web |
+| `npm run build` | Compile the API to `api/dist` and build the web app to `web/dist` |
+| `npm start` | Run the production build (after `npm run build`) with embedded PostgreSQL; the API serves the web app on `:4000` |
+| `npm run seed` | Reset the database to demo data (**destructive**) |
 
-On a paid plan you'd run the worker as a separate service, using `npm run start:worker -w api`, and drop `WORKER_IN_PROCESS`. Running both at once is safe, because jobs are claimed with `SKIP LOCKED`.
+## Configuration
 
----
+All configuration is through environment variables. Defaults suit local development.
 
-## A 5-minute demo script
-
-Open two browsers, or one normal window and one private window.
-
-1. **Simultaneous claim.** Sign in as Rahul in one window and Alex in the other. Open the same unassigned Payments item (Dashboard → "Unassigned urgent work") and click **Claim** in both. One wins; the other gets "Rahul Verma already owns this item" and the page updates to show the real owner.
-2. **Stale edit.** Sign in as Rahul and Priya, and open `PAY-1` in both. Priya clicks **Edit** on the description. Rahul changes the priority. Priya instantly sees *"Rahul Verma just updated this item"* and a warning inside the editor. When Priya saves, a conflict dialog shows *theirs* next to *yours*, and nothing is overwritten silently.
-3. **Workflow and approval.** As Rahul on `PAY-1`, there's no **Resolve** button, because payments need approval. Click **Request approval**. Priya gets a notification, and the item appears in her **Approvals** queue. Rahul cannot approve it himself, and neither could an admin who owns the item.
-4. **Authorization.** Sign in as Vera (viewer): she can read and comment, but has no edit, claim or create buttons. The API enforces this too, as the `curl` example below shows. Sam can't open Payments items at all (404).
-5. **History.** Every item's timeline shows who changed what and when: priority P3 → P1, owner changes, reasons for blocking or cancelling, approvals, SLA breaches.
-6. **Background jobs.** Sign in as Ada (admin) and open **Teams & admin** to see job stats and dead-lettered jobs, each with a Retry button.
-
-```bash
-# The server, not the UI, enforces permissions:
-curl -i -X PATCH localhost:4000/api/items/<id> -H 'X-Requested-With: opsdesk' \
-  -H 'Content-Type: application/json' -b 'opsdesk_session=<vera-cookie>' -d '{"version":1,"title":"x"}'
-# → 403 FORBIDDEN
-```
-
----
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_URL` | local embedded instance | PostgreSQL connection string |
+| `PORT` / `HOST` | `4000` / `127.0.0.1` | HTTP listener (use `HOST=0.0.0.0` in containers) |
+| `NODE_ENV` | (unset) | `production` marks the session cookie `Secure` |
+| `TRUST_PROXY` | `0` | `1` behind a reverse proxy, so client IPs are correct for login throttling |
+| `WORKER_IN_PROCESS` | `0` | `1` runs the job worker inside the API process (single-instance hosting) |
+| `SEED_DEMO_DATA` | `0` | `1` seeds demo data on boot when the database is empty |
+| `DB_POOL_SIZE` | `20` | PostgreSQL connection pool size |
+| `SESSION_TTL_HOURS` | `168` | Session lifetime |
+| `ACTOR_CACHE_MS` | `30000` | Identity cache TTL (invalidated immediately on logout or role change) |
+| `LOGIN_MAX_FAILURES` | `8` | Failed sign-ins per account in 15 minutes before lockout (×5 per IP) |
+| `JOB_MAX_ATTEMPTS` | `5` | Attempts before a job is dead-lettered |
+| `JOB_POLL_MS` / `SLA_SCAN_MS` | `1000` / `30000` | Worker polling and SLA scan intervals |
+| `LOG_LEVEL` | `info` | Pino log level |
+| `TEST_DATABASE_URL` | (unset) | Run tests against an existing, **disposable** database instead of the embedded one |
 
 ## Architecture
 
 ```
-Browser (React + TanStack Query)
-  │  REST/JSON, httpOnly session cookie       ▲ Server-Sent Events ("item X changed")
-  ▼                                           │
-API (Fastify) ── auth → zod validation → policy (per-team roles) → service
-  │      one transaction per write: lock row → check version → apply rules
-  │      → update + version++ → append history → enqueue job → NOTIFY
-  ▼
-PostgreSQL ── work_items · activity_events (append-only) · approvals · watchers
-  ▲           notifications · idempotency_keys · jobs (outbox) · tsvector search
-  │
-Worker ── jobs via FOR UPDATE SKIP LOCKED: notification fan-out, SLA scan,
-          retries with backoff → DEAD after 5 attempts (admin can retry)
+Browser (React · TanStack Query)
+   │  REST + httpOnly session cookie            ▲ Server-Sent Events ("item X changed")
+   ▼                                            │
+API (Fastify) ─ auth → validation (zod) → authorization policy → service
+   │   every write: one transaction — lock row → check version → apply rules
+   │                → update + version++ → append history → enqueue job → NOTIFY
+   ▼
+PostgreSQL ─ work items · append-only history · approvals · notifications
+   ▲          idempotency keys · jobs (outbox) · full-text search · LISTEN/NOTIFY
+   │
+Worker ─ jobs via FOR UPDATE SKIP LOCKED · retries with backoff · dead-letter queue
 ```
 
-**Code map**
+The design, the five key decisions and their trade-offs, failure handling and the scaling path are documented in **[ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md)**.
 
-| Path | What's there |
+### Project structure
+
+```
+├── api/                      Fastify API, worker and tests
+│   ├── src/
+│   │   ├── domain/           Pure rules: authorization policy, workflow state machine
+│   │   ├── services/         Business operations (single write path: mutateItem)
+│   │   ├── routes/           HTTP endpoints and request validation
+│   │   ├── jobs/             Outbox worker, notification fan-out, SLA scan
+│   │   ├── lib/              Idempotency, outbox, live updates, errors
+│   │   └── db/               Migrations, connection pool, seed data
+│   └── tests/                Concurrency, authorization, workflow and job tests
+├── web/                      React application
+│   └── src/
+│       ├── api/              API client, queries, mutation reconciliation
+│       ├── pages/            Dashboard, work list, item detail, approvals, teams
+│       ├── components/       Shared UI
+│       └── lib/              Live updates, next-step guidance, formatting
+├── .github/workflows/ci.yml  Continuous integration
+├── render.yaml               Deployment blueprint
+└── docker-compose.yml        Optional PostgreSQL for local development
+```
+
+## Testing
+
+```bash
+npm test
+```
+
+57 tests (49 API, 8 web). They focus on the behaviours that are most harmful if wrong, and run with **real concurrent requests against a real PostgreSQL**, because locking guarantees can't be proven with mocks.
+
+| Suite | Covers |
 |---|---|
-| `api/src/db/migrations/001_init.sql` | schema, constraints and indexes, with notes on each |
-| `api/src/domain/policy.ts` | **who may do what** (pure functions) |
-| `api/src/domain/workflow.ts` | **state machine** (pure functions) |
-| `api/src/services/items.ts` | `mutateItem`, the single write path, plus listing and search with keyset pagination |
-| `api/src/lib/idempotency.ts` | exactly-once create and comment |
-| `api/src/jobs/worker.ts` | outbox consumer, notification fan-out, SLA scan |
-| `api/src/lib/live.ts` | SSE hub fed by Postgres `LISTEN` |
-| `web/src/api/hooks.ts` | queries plus `useItemMutation` (optimistic → reconcile → conflict) |
-| `web/src/pages/ItemDetailPage.tsx` | the main screen: "Next:" guidance, workflow actions, approvals, conflict dialog |
-| `web/src/pages/LandingPage.tsx` | public landing page (full-bleed video, dot-matrix display type) |
+| `api/tests/concurrency.test.ts` | Simultaneous claims (exactly one owner); stale edits (exactly one applied); idempotent creation under concurrent duplicates; approval races; unique, gap-free item keys; a 50-operation mixed burst with no lost or double-applied update |
+| `api/tests/authorization.test.ts` | Authentication, CSRF protection, login lockout, team isolation (404), role permissions, separation of duties, immediate revocation on logout or role change |
+| `api/tests/workflow.test.ts` | Every invalid transition, approval gating, required reasons, history integrity, the database constraint backstop, keyset pagination, search |
+| `api/tests/jobs.test.ts` | Notification fan-out, idempotent redelivery, backoff and dead-lettering, partial-failure rollback, concurrent workers, SLA scan |
+| `web/src/**/*.test.ts(x)` | Optimistic update reconciliation (success, rollback, version conflict); next-step guidance |
 
-**Workflow**
+The concurrency tests were checked by deliberately removing the row lock and confirming they fail.
 
+**Continuous integration** runs on every push and pull request: lint, format check, type-check, all tests and the production build on Node.js 20 and 22, plus the API suite against a standard PostgreSQL server.
+
+## Deployment
+
+The repository includes a [Render](https://render.com) blueprint (`render.yaml`) that provisions a web service and a managed PostgreSQL database:
+
+1. Push the repository to GitHub.
+2. In Render, choose **New → Blueprint** and select the repository.
+3. On first boot the service applies migrations and loads demo data.
+
+For any other platform, run the compiled build:
+
+```bash
+npm ci --include=dev && npm run build
+NODE_ENV=production HOST=0.0.0.0 DATABASE_URL=… npm run start -w api   # API + web on $PORT
+npm run start:worker -w api                                              # optional separate worker
 ```
-OPEN ─start/claim─► IN_PROGRESS ⇄ BLOCKED (reason required)
-                       │  ▲
-       request approval│  │approve / reject (reason) / withdraw
-                       ▼  │
-                 PENDING_APPROVAL
-IN_PROGRESS ─resolve (resolution required; approval first if required)─► RESOLVED ─► CLOSED
-RESOLVED ─reopen (reason; revokes approval)─► IN_PROGRESS
-any non-terminal ─cancel (leads only, reason)─► CANCELLED
-```
 
-## Scale notes
+Migrations run automatically on start, guarded by an advisory lock, so multiple instances can start at the same time. Workers can scale horizontally: jobs are claimed with `FOR UPDATE SKIP LOCKED`.
 
-- **No full-dataset loads.**
-  - Lists use **keyset (cursor) pagination**, so cost stays flat at any page depth (unlike `OFFSET`).
-  - The dashboard is a handful of capped, index-backed queries.
-  - The activity timeline is paginated too.
-- **Indexes match the access patterns:** team + status + priority, team + updated, owner + status, partial index on due dates of active work, and GIN for full-text search.
-- **Search:** typing `PAY-12` is an exact key lookup. Words are prefix-matched (`refu stu` finds "Refund stuck…"). The "New item" form also uses search to flag **possible duplicates** before you create one.
-- **The dashboard only touches active work.** Counters use a partial index over active items, so their cost follows "how much is in flight", not "how much history exists".
-- **List totals are capped** at 1,000 (shown as "1,000+"), because exact counts get expensive as history grows.
-- **Identity cache.** Each request's session and team-role lookup is cached for up to 30 seconds. Role changes and logouts clear it immediately across all API instances, using Postgres NOTIFY.
-- **Measured on the seeded data** (about 6,000 items and 22,000 history events): every list, search, dashboard and timeline query runs in 2 ms or less, using indexes.
+## Security
 
-## Testing strategy
-
-The tests target the behaviours that would be most dangerous if wrong, and they run against a **real PostgreSQL**, because mocks can't prove locking.
-
-| File | What it proves |
-|---|---|
-| `api/tests/concurrency.test.ts` | a burst of 50 mixed concurrent operations on one item (no lost update, no gap, no 5xx); 12 parallel claims → exactly 1 owner and 1 history entry; N parallel edits from one version → exactly 1 applied; idempotent create under 8 concurrent duplicates → 1 item; key reuse with a different body → 422; simultaneous approve and reject → one decision; 15 concurrent creates → unique, gap-free keys |
-| `api/tests/authorization.test.ts` | 401s, login lockout after repeated failures, logout and team removal take effect on the very next request, CSRF header, cross-team 404s, list/search isolation, viewer limits, member-vs-lead rules, assignees must be team members, **no self-approval (even admin)**, members can't waive approval, notifications are private |
-| `api/tests/workflow.test.ts` | demo data never marks work overdue before its due date; every illegal transition rejected; approval gating; reasons required; reopen revokes approval; full lifecycle produces exact history; failed writes leave no events or jobs; DB constraint backstop; pagination visits every item exactly once; key and prefix search |
-| `api/tests/jobs.test.ts` | fan-out recipients; re-delivery doesn't double-notify; backoff then dead-letter without blocking other jobs; partial writes of a failed job roll back; 4 concurrent workers never double-process; SLA scan flags exactly once |
-| `web/src/api/hooks.test.tsx` | optimistic update → server result; rollback on 403; conflict adopts server copy and returns the user's change |
-| `web/src/lib/nextStep.test.ts` | the per-item "Next:" guidance (owner needed, approval needed, overdue, decision needed) |
-
-**CI:** every push runs ESLint, Prettier, type-check, all tests and the production build on Linux with Node 20 and 22, plus the API tests against a standard PostgreSQL server ([workflow](.github/workflows/ci.yml)).
-
-To check that the tests actually catch bugs, I removed the row lock (the claim-race and concurrent-edit tests fail) and removed the identity-cache invalidation (the access-revocation test fails).
+- Authorization is enforced on the server for every request. Items outside a user's teams return `404`.
+- Passwords are hashed with bcrypt. Session tokens are random, stored only as SHA-256 hashes, and carried in `httpOnly`, `SameSite=Lax` cookies (`Secure` in production).
+- State-changing requests require a custom header, which blocks cross-site request forgery.
+- Login is throttled per account and per IP. Error messages don't reveal whether an account exists.
+- All input is validated with zod, and all SQL is parameterised.
 
 ## Known limitations
 
-- Notifications are in-app only (no email or Slack). There's no password reset or SSO. Login rate limiting is in-memory, so it applies per API instance.
-- No attachments, @mentions, custom per-team workflows, moving items between teams, or comment editing.
-- Duplicate detection is word-based (Postgres full-text), not semantic.
-- The live-update client trusts the network to reconnect. After a reconnect it refetches everything rather than replaying missed events.
-- The landing page's background video and display font come from third-party CDNs; the app works without them.
-
-See **ENGINEERING_DECISIONS.md** for the reasoning and trade-offs.
+- Notifications are in-app only. There is no email or Slack delivery, password reset or SSO.
+- Login throttling and the identity cache are per instance (in memory). With several instances they should move to a shared store such as Redis.
+- Duplicate detection is word-based (PostgreSQL full-text search), not semantic.
+- After a live-update disconnect the client refetches its data rather than replaying missed events.
+- Scale has been measured at ~6,000 items and 22,000 history events (all key queries ≤ 2 ms). It has not been load-tested at thousands of concurrent users.
+- The landing page loads its background video and display font from public CDNs. The application works without them.
