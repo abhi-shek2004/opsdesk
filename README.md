@@ -1,14 +1,69 @@
+<div align="center">
+
 # OpsDesk
 
-An internal web app for coordinating operational work: customer issues, incidents, payment investigations, compliance requests and approvals. It's built so that work has a clear owner, every change is on record, and people acting at the same moment don't overwrite each other.
+**Coordinate operational work without losing it in chat.**
+Customer issues, incidents, payment investigations, compliance requests and approvals, each with a clear owner, a full history and safe behaviour when people act at the same moment.
 
-**Stack:** React 19 + TanStack Query + Tailwind (web) · Node + Fastify + TypeScript (API and worker) · PostgreSQL.
+### [▶ Open the live demo](https://opsdesk-gb7f.onrender.com)
 
-**Live demo:** https://opsdesk-gb7f.onrender.com. Sign in with any demo account below. It runs on a free instance, so the first request after 15 idle minutes takes about a minute to wake it.
+[![Live demo](https://img.shields.io/badge/live%20demo-opsdesk--gb7f.onrender.com-4f46e5?style=for-the-badge)](https://opsdesk-gb7f.onrender.com)
+![Tests](https://img.shields.io/badge/tests-56%20passing-16a34a?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+
+[Live demo](https://opsdesk-gb7f.onrender.com) · [Engineering decisions](ENGINEERING_DECISIONS.md) · [Review notes](DISCUSSION_NOTES.md) · [5-minute demo script](#a-5-minute-demo-script)
+
+<img src="docs/screenshots/landing.jpg" alt="OpsDesk landing page" width="900" />
+
+</div>
 
 ---
 
-## Run it
+## Try it in 30 seconds
+
+1. Open **https://opsdesk-gb7f.onrender.com** and click **Get Started**.
+2. Click any demo account. They all use the password **`password123`**.
+3. Open a second browser (or a private window) as another user to see live updates, claim races and approvals.
+
+The demo runs on a free instance: after 15 idle minutes, the first visit takes about a minute to wake it.
+
+| Account | Role(s) | Good for demoing |
+|---|---|---|
+| `priya@opsdesk.dev` | Payments **lead**, Compliance member | approving refunds |
+| `rahul@opsdesk.dev` | Payments + Operations member | owns `PAY-1`, requests approval |
+| `sam@opsdesk.dev` | Engineering **lead** | can't see Payments at all |
+| `alex@opsdesk.dev` | Engineering + Payments member | racing Rahul to claim |
+| `vera@opsdesk.dev` | **viewer** (read and comment only) | authorization |
+| `admin@opsdesk.dev` | global admin | team management, failed jobs |
+
+## Screenshots
+
+| Dashboard: what needs my attention | Item: next step, workflow, history |
+|---|---|
+| <img src="docs/screenshots/dashboard.png" alt="Dashboard" /> | <img src="docs/screenshots/item-detail.png" alt="Item detail" /> |
+| **Work items: filters, search, 1,000+ items** | **Approvals: lead sign-off queue** |
+| <img src="docs/screenshots/work-items.png" alt="Work items list" /> | <img src="docs/screenshots/approvals.png" alt="Approvals queue" /> |
+
+## What it does
+
+- **Work items with clear ownership.** What it is, why it exists, status, priority, owner, due date, and a "Next:" line saying what has to happen next.
+- **Teams and roles.** Viewer, member or lead per team, plus admins. Every permission is enforced by the server; the UI only hides buttons as a convenience.
+- **Workflow rules.** Open → In progress ⇄ Blocked → Pending approval → Resolved → Closed. Payment and compliance work can't be resolved without a lead's approval, and nobody can approve their own work.
+- **Full history.** Every change (owner, priority, status, approvals, edits, comments) is recorded in the same transaction as the change itself.
+- **Safe when people act at once.**
+  - Simultaneous claims: exactly one person wins, and the other is told who.
+  - Stale edits: a conflict dialog instead of a silent overwrite.
+  - Double-clicks and retries: they never create duplicates.
+- **Live updates.** You see teammates' changes as they happen, and get notifications for work you watch.
+- **Reliable background work.** Notifications and overdue checks run in a worker with retries, a dead-letter queue and duplicate protection.
+- **Built to grow.** Cursor pagination, indexed full-text search, and a dashboard that only touches active work. Seeded with 6,000 items and 22,000 history events.
+
+**Stack:** React 19, TanStack Query and Tailwind (web) · Node, Fastify and TypeScript (API and worker) · PostgreSQL (data, job queue, live-update bus and search).
+
+---
+
+## Run it locally
 
 **Requirements:** Node.js 20+ and npm. Docker and a local Postgres are **not** required: an embedded PostgreSQL binary is downloaded via npm.
 
@@ -23,16 +78,7 @@ npm run dev
 - **worker:** background jobs.
 - **web:** http://localhost:5173. Open this one.
 
-All demo accounts use the password **`password123`**. The login page also has one-click buttons for each account.
-
-| Account | Role(s) | Good for demoing |
-|---|---|---|
-| `priya@opsdesk.dev` | Payments **lead**, Compliance member | approving refunds |
-| `rahul@opsdesk.dev` | Payments + Operations member | owns `PAY-1`, requests approval |
-| `sam@opsdesk.dev` | Engineering **lead** | can't see Payments at all |
-| `alex@opsdesk.dev` | Engineering + Payments member | racing Rahul to claim |
-| `vera@opsdesk.dev` | **viewer** (read and comment only) | authorization |
-| `admin@opsdesk.dev` | global admin | team management, failed jobs |
+Sign in with any of the demo accounts above.
 
 Other commands:
 
