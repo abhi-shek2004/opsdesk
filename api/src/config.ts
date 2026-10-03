@@ -7,7 +7,7 @@ export const config = {
   /** How long a resolved session+memberships stays cached in memory (invalidated early via NOTIFY). */
   actorCacheMs: Number(process.env.ACTOR_CACHE_MS ?? 30_000),
   login: { maxFailures: Number(process.env.LOGIN_MAX_FAILURES ?? 8), windowMs: 15 * 60_000 },
-  cookieSecure: process.env.NODE_ENV === 'production',
+  cookieSecure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === '1',
   logLevel: process.env.LOG_LEVEL ?? (process.env.NODE_ENV === 'test' ? 'silent' : 'info'),
   job: {
     maxAttempts: Number(process.env.JOB_MAX_ATTEMPTS ?? 5),

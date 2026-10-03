@@ -1,0 +1,38 @@
+# Render Blueprint: one web service (API + web UI + background worker) and a Postgres database.
+# Deploy: Render dashboard → New → Blueprint → pick this repository.
+services:
+  - type: web
+    name: opsdesk
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start -w api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "1"
+      # The free plan has no separate background workers, so jobs run inside the web process.
+      - key: WORKER_IN_PROCESS
+        value: "1"
+      # First boot on an empty database loads the demo users and ~6,000 items.
+      - key: SEED_DEMO_DATA
+        value: "1"
+      - key: DB_POOL_SIZE
+        value: "10"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: opsdesk-db
+          property: connectionString
+
+databases:
+  - name: opsdesk-db
+    plan: free
+    region: singapore
+    databaseName: opsdesk

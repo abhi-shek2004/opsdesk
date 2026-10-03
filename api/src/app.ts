@@ -26,6 +26,9 @@ export async function buildApp(opts: { serveWeb?: boolean } = {}): Promise<Fasti
   const app = Fastify({
     logger: config.logLevel === 'silent' ? false : { level: config.logLevel },
     bodyLimit: 256 * 1024,
+    // Behind a hosting proxy (Render, a load balancer), take the client IP from X-Forwarded-For
+    // so per-IP login throttling sees real visitors instead of the proxy.
+    trustProxy: process.env.TRUST_PROXY === '1',
   });
   await app.register(cookie);
 

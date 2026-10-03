@@ -43,6 +43,25 @@ npm run build && npm start   # production build served by the API on :4000
 
 To use your own Postgres instead, see `docker-compose.yml`. Set `DATABASE_URL` and run `npm run dev:external-db`.
 
+### Deploying (Render)
+
+`render.yaml` describes the whole deployment: one web service, which serves the UI, the API and the background worker, plus a managed PostgreSQL database.
+
+1. Push this repository to GitHub.
+2. In Render, choose **New → Blueprint** and select the repository. Render creates the database and the service and deploys.
+3. On first boot the server runs migrations and loads the demo data.
+
+Production settings, all already set in `render.yaml`:
+
+| Setting | What it does |
+|---|---|
+| `NODE_ENV=production` | login cookies are only sent over HTTPS |
+| `TRUST_PROXY=1` | the real client IP is used for login throttling |
+| `WORKER_IN_PROCESS=1` | the job loop runs inside the web process (the free plan has no separate workers) |
+| `SEED_DEMO_DATA=1` | an empty database gets the demo data |
+
+On a paid plan you'd run the worker as a separate service, using `npm run start:worker -w api`, and drop `WORKER_IN_PROCESS`. Running both at once is safe, because jobs are claimed with `SKIP LOCKED`.
+
 ---
 
 ## A 5-minute demo script
