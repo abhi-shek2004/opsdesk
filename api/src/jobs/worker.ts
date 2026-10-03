@@ -36,7 +36,9 @@ export const handlers: Record<string, JobHandler> = {
     if (ev.owner_id) recipients.add(ev.owner_id);
     if (ev.type === 'ASSIGNED' && ev.payload?.to?.id) recipients.add(ev.payload.to.id);
     if (ev.type === 'APPROVAL_REQUESTED') {
-      const leads = await tx.query(`SELECT user_id FROM team_members WHERE team_id = $1 AND role = 'LEAD'`, [ev.team_id]);
+      const leads = await tx.query(`SELECT user_id FROM team_members WHERE team_id = $1 AND role = 'LEAD'`, [
+        ev.team_id,
+      ]);
       leads.rows.forEach((l) => recipients.add(l.user_id));
     }
     if (ev.actor_id) recipients.delete(ev.actor_id); // don't notify people about their own actions
@@ -90,7 +92,8 @@ export async function processJobs(limit = 20): Promise<number> {
            WHERE id = $1`,
           [job.id, attempts, String((err as Error)?.message ?? err).slice(0, 1000), dead, String(backoffMs(attempts))],
         );
-        if (!process.env.VITEST) console.error(`[worker] job ${job.id} (${job.type}) failed (attempt ${attempts}):`, err);
+        if (!process.env.VITEST)
+          console.error(`[worker] job ${job.id} (${job.type}) failed (attempt ${attempts}):`, err);
       }
     }
     return jobs.length;
@@ -116,7 +119,14 @@ export async function scanSla(): Promise<number> {
         [r.id, JSON.stringify({ dueAt: r.due_at })],
       );
       await enqueue(tx, 'notify', { eventId: ev.rows[0].id });
-      await publish(tx, { kind: 'item', itemId: r.id, teamId: r.team_id, version: r.version, actorId: null, event: 'SLA_BREACHED' });
+      await publish(tx, {
+        kind: 'item',
+        itemId: r.id,
+        teamId: r.team_id,
+        version: r.version,
+        actorId: null,
+        event: 'SLA_BREACHED',
+      });
     }
     return rows.length;
   });

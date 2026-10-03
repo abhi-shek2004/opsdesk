@@ -6,7 +6,19 @@ import { ItemTable } from '../components/ItemTable';
 import { Button, Card, EmptyState, ErrorState, Spinner } from '../components/ui';
 import { STATUS_LABEL, TYPE_LABEL } from '../lib/format';
 
-const FILTER_KEYS = ['team', 'status', 'priority', 'type', 'owner', 'q', 'active', 'overdue', 'watching', 'sort', 'createdBy'];
+const FILTER_KEYS = [
+  'team',
+  'status',
+  'priority',
+  'type',
+  'owner',
+  'q',
+  'active',
+  'overdue',
+  'watching',
+  'sort',
+  'createdBy',
+];
 
 const VIEWS = [
   { label: 'My open work', params: 'owner=me&active=true&sort=priority' },
@@ -97,7 +109,11 @@ export function ItemsPage() {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {VIEWS.map((v) => (
-            <Link key={v.label} to={`/items?${v.params}`} className="rounded-md px-2 py-1 text-xs text-slate-600 hover:bg-slate-200/60">
+            <Link
+              key={v.label}
+              to={`/items?${v.params}`}
+              className="rounded-md px-2 py-1 text-xs text-slate-600 hover:bg-slate-200/60"
+            >
               {v.label}
             </Link>
           ))}
@@ -115,7 +131,12 @@ export function ItemsPage() {
               onChange={(e) => setQ(e.target.value)}
               aria-label="Search"
             />
-            <select className="input" value={filters.team ?? ''} onChange={(e) => update({ team: e.target.value || null, owner: null })} aria-label="Team">
+            <select
+              className="input"
+              value={filters.team ?? ''}
+              onChange={(e) => update({ team: e.target.value || null, owner: null })}
+              aria-label="Team"
+            >
               <option value="">All my teams</option>
               {me?.teams.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -123,7 +144,12 @@ export function ItemsPage() {
                 </option>
               ))}
             </select>
-            <select className="input" value={filters.owner ?? ''} onChange={(e) => update({ owner: e.target.value || null })} aria-label="Owner">
+            <select
+              className="input"
+              value={filters.owner ?? ''}
+              onChange={(e) => update({ owner: e.target.value || null })}
+              aria-label="Owner"
+            >
               <option value="">Any owner</option>
               <option value="me">Me</option>
               <option value="none">Unassigned</option>
@@ -135,22 +161,35 @@ export function ItemsPage() {
                   </option>
                 ))}
             </select>
-            <select className="input" value={filters.type ?? ''} onChange={(e) => update({ type: e.target.value || null })} aria-label="Type">
-                <option value="">All types</option>
-                {ITEM_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {TYPE_LABEL[t]}
-                  </option>
-                ))}
+            <select
+              className="input"
+              value={filters.type ?? ''}
+              onChange={(e) => update({ type: e.target.value || null })}
+              aria-label="Type"
+            >
+              <option value="">All types</option>
+              {ITEM_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {TYPE_LABEL[t]}
+                </option>
+              ))}
             </select>
-            <select className="input" value={filters.sort ?? 'updated'} onChange={(e) => update({ sort: e.target.value })} aria-label="Sort">
-                <option value="updated">Recently updated</option>
-                <option value="priority">Most urgent</option>
-                <option value="created">Newest</option>
+            <select
+              className="input"
+              value={filters.sort ?? 'updated'}
+              onChange={(e) => update({ sort: e.target.value })}
+              aria-label="Sort"
+            >
+              <option value="updated">Recently updated</option>
+              <option value="priority">Most urgent</option>
+              <option value="created">Newest</option>
             </select>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Chip active={filters.active === 'true'} onClick={() => update({ active: filters.active === 'true' ? null : 'true', status: null })}>
+            <Chip
+              active={filters.active === 'true'}
+              onClick={() => update({ active: filters.active === 'true' ? null : 'true', status: null })}
+            >
               Active only
             </Chip>
             <span className="mx-1 h-4 w-px bg-slate-200" />
@@ -165,11 +204,17 @@ export function ItemsPage() {
                 {p}
               </Chip>
             ))}
-            <Chip active={filters.overdue === 'true'} onClick={() => update({ overdue: filters.overdue === 'true' ? null : 'true' })}>
+            <Chip
+              active={filters.overdue === 'true'}
+              onClick={() => update({ overdue: filters.overdue === 'true' ? null : 'true' })}
+            >
               Overdue
             </Chip>
             {hasFilters && (
-              <button className="ml-auto text-xs font-medium text-slate-500 hover:text-slate-800" onClick={() => setParams(new URLSearchParams(), { replace: true })}>
+              <button
+                className="ml-auto text-xs font-medium text-slate-500 hover:text-slate-800"
+                onClick={() => setParams(new URLSearchParams(), { replace: true })}
+              >
                 Clear filters
               </button>
             )}
@@ -183,7 +228,10 @@ export function ItemsPage() {
         ) : query.error ? (
           <ErrorState error={query.error} onRetry={query.refetch} />
         ) : rows.length === 0 ? (
-          <EmptyState title="No work items match these filters." hint="Try clearing a filter or searching for different words." />
+          <EmptyState
+            title="No work items match these filters."
+            hint="Try clearing a filter or searching for different words."
+          />
         ) : (
           <div className={query.isPlaceholderData ? 'opacity-60 transition-opacity' : ''}>
             <ItemTable items={rows} showTeam={!filters.team} />

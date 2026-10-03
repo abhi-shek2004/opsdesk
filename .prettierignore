@@ -1,0 +1,6 @@
+node_modules
+dist
+.pgdata
+package-lock.json
+web/public
+*.md

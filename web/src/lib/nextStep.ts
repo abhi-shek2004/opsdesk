@@ -25,7 +25,10 @@ export function nextStep(item: ItemDetail, meId: string | undefined, now = Date.
       return null;
     case 'RESOLVED':
       step = p.transitions.includes('CLOSED')
-        ? { tone: 'action', text: 'Resolved. Close it once the requester confirms, or reopen it if the problem is back.' }
+        ? {
+            tone: 'action',
+            text: 'Resolved. Close it once the requester confirms, or reopen it if the problem is back.',
+          }
         : { tone: 'done', text: 'Resolved. Waiting to be closed.' };
       break;
     case 'PENDING_APPROVAL':
@@ -52,7 +55,10 @@ export function nextStep(item: ItemDetail, meId: string | undefined, now = Date.
       } else if (item.requiresApproval && !item.approvedAt) {
         step = mine
           ? { tone: 'action', text: 'Request approval from a team lead before this can be resolved.' }
-          : { tone: 'waiting', text: `${owner} is working on it. It needs a lead's approval before it can be resolved.` };
+          : {
+              tone: 'waiting',
+              text: `${owner} is working on it. It needs a lead's approval before it can be resolved.`,
+            };
       } else if (item.requiresApproval && item.approvedAt) {
         step = mine
           ? { tone: 'action', text: 'Approved. Ready for you to resolve.' }

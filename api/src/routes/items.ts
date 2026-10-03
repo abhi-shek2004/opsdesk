@@ -10,7 +10,12 @@ const idParams = z.object({ id: uuid });
 const csvEnum = <T extends readonly [string, ...string[]]>(values: T) =>
   z
     .string()
-    .transform((s) => s.split(',').map((x) => x.trim()).filter(Boolean))
+    .transform((s) =>
+      s
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean),
+    )
     .pipe(z.array(z.enum(values)))
     .optional();
 
@@ -153,7 +158,10 @@ export async function registerItemRoutes(app: FastifyInstance) {
   app.get('/api/items/:id/activity', async (req) => {
     const { id } = idParams.parse(req.params);
     const q = z
-      .object({ before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(100).default(50) })
+      .object({
+        before: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(50),
+      })
       .parse(req.query);
     return items.listActivity(req.actor, id, q.before, q.limit);
   });

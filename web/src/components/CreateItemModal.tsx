@@ -3,7 +3,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { api, newIdempotencyKey, qs } from '../api/client';
 import { invalidateLists, qk, useMe } from '../api/hooks';
-import { APPROVAL_TYPES_DEFAULT, ITEM_TYPES, PRIORITIES, type ItemDetail, type ItemType, type Priority } from '../api/types';
+import {
+  APPROVAL_TYPES_DEFAULT,
+  ITEM_TYPES,
+  PRIORITIES,
+  type ItemDetail,
+  type ItemType,
+  type Priority,
+} from '../api/types';
 import { fromLocalInput, PRIORITY_LABEL, STATUS_LABEL, TYPE_LABEL } from '../lib/format';
 import { useToast } from '../lib/toast';
 import { Button, Modal, PriorityBadge } from './ui';
@@ -17,7 +24,15 @@ function useDebounced<T>(value: T, ms: number): T {
   return v;
 }
 
-export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolean; onClose: () => void; defaultTeamId?: string }) {
+export function CreateItemModal({
+  open,
+  onClose,
+  defaultTeamId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  defaultTeamId?: string;
+}) {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const toast = useToast();
@@ -43,7 +58,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
   useEffect(() => {
     if (!open) return;
     idemKey.current = newIdempotencyKey();
-    setTeamId(defaultTeamId && writableTeams.some((t) => t.id === defaultTeamId) ? defaultTeamId : (writableTeams[0]?.id ?? ''));
+    setTeamId(
+      defaultTeamId && writableTeams.some((t) => t.id === defaultTeamId) ? defaultTeamId : (writableTeams[0]?.id ?? ''),
+    );
     setType('TASK');
     setTitle('');
     setDescription('');
@@ -62,9 +79,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
   const similar = useQuery({
     queryKey: ['similar', teamId, debouncedTitle],
     queryFn: () =>
-      api<{ items: { id: string; key: string; title: string; status: keyof typeof STATUS_LABEL; priority: Priority }[] }>(
-        `/items/similar${qs({ q: debouncedTitle, team: teamId })}`,
-      ),
+      api<{
+        items: { id: string; key: string; title: string; status: keyof typeof STATUS_LABEL; priority: Priority }[];
+      }>(`/items/similar${qs({ q: debouncedTitle, team: teamId })}`),
     enabled: open && debouncedTitle.length >= 4,
     staleTime: 30_000,
   });
@@ -126,7 +143,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
           }}
         >
           <div>
-            <label className="label" htmlFor="ci-team">Team</label>
+            <label className="label" htmlFor="ci-team">
+              Team
+            </label>
             <select id="ci-team" className="input" value={teamId} onChange={(e) => setTeamId(e.target.value)}>
               {writableTeams.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -136,7 +155,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
             </select>
           </div>
           <div>
-            <label className="label" htmlFor="ci-type">Type</label>
+            <label className="label" htmlFor="ci-type">
+              Type
+            </label>
             <select id="ci-type" className="input" value={type} onChange={(e) => setType(e.target.value as ItemType)}>
               {ITEM_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -146,7 +167,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="label" htmlFor="ci-title">Title</label>
+            <label className="label" htmlFor="ci-title">
+              Title
+            </label>
             <input
               id="ci-title"
               className="input"
@@ -163,7 +186,11 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
                   {similar.data.items.map((s) => (
                     <li key={s.id} className="flex items-center gap-2">
                       <PriorityBadge priority={s.priority} />
-                      <Link to={`/items/${s.id}`} onClick={onClose} className="truncate text-amber-900 underline-offset-2 hover:underline">
+                      <Link
+                        to={`/items/${s.id}`}
+                        onClick={onClose}
+                        className="truncate text-amber-900 underline-offset-2 hover:underline"
+                      >
                         <span className="font-mono">{s.key}</span> {s.title}
                       </Link>
                       <span className="shrink-0 text-amber-700">· {STATUS_LABEL[s.status]}</span>
@@ -174,7 +201,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
             )}
           </div>
           <div className="sm:col-span-2">
-            <label className="label" htmlFor="ci-desc">Description</label>
+            <label className="label" htmlFor="ci-desc">
+              Description
+            </label>
             <textarea
               id="ci-desc"
               className="input min-h-28"
@@ -184,8 +213,15 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
             />
           </div>
           <div>
-            <label className="label" htmlFor="ci-pri">Priority</label>
-            <select id="ci-pri" className="input" value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
+            <label className="label" htmlFor="ci-pri">
+              Priority
+            </label>
+            <select
+              id="ci-pri"
+              className="input"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+            >
               {PRIORITIES.map((p) => (
                 <option key={p} value={p}>
                   {PRIORITY_LABEL[p]}
@@ -194,8 +230,16 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
             </select>
           </div>
           <div>
-            <label className="label" htmlFor="ci-due">Due (optional)</label>
-            <input id="ci-due" type="datetime-local" className="input" value={dueAt} onChange={(e) => setDueAt(e.target.value)} />
+            <label className="label" htmlFor="ci-due">
+              Due (optional)
+            </label>
+            <input
+              id="ci-due"
+              type="datetime-local"
+              className="input"
+              value={dueAt}
+              onChange={(e) => setDueAt(e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-2 sm:col-span-2">
             <label className="flex items-start gap-2 text-sm">
@@ -209,7 +253,9 @@ export function CreateItemModal({ open, onClose, defaultTeamId }: { open: boolea
               <span>
                 Requires approval before it can be resolved
                 {approvalByDefault && !isLead && (
-                  <span className="block text-xs text-slate-500">{TYPE_LABEL[type]} items always need a lead's sign-off.</span>
+                  <span className="block text-xs text-slate-500">
+                    {TYPE_LABEL[type]} items always need a lead's sign-off.
+                  </span>
                 )}
               </span>
             </label>

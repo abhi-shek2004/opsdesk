@@ -3,7 +3,15 @@ export type Priority = 'P1' | 'P2' | 'P3' | 'P4';
 export type ItemType = 'INCIDENT' | 'CUSTOMER_ISSUE' | 'PAYMENT' | 'ENGINEERING' | 'COMPLIANCE' | 'TASK';
 export type Role = 'VIEWER' | 'MEMBER' | 'LEAD';
 
-export const STATUSES: Status[] = ['OPEN', 'IN_PROGRESS', 'BLOCKED', 'PENDING_APPROVAL', 'RESOLVED', 'CLOSED', 'CANCELLED'];
+export const STATUSES: Status[] = [
+  'OPEN',
+  'IN_PROGRESS',
+  'BLOCKED',
+  'PENDING_APPROVAL',
+  'RESOLVED',
+  'CLOSED',
+  'CANCELLED',
+];
 export const ACTIVE_STATUSES: Status[] = ['OPEN', 'IN_PROGRESS', 'BLOCKED', 'PENDING_APPROVAL'];
 export const PRIORITIES: Priority[] = ['P1', 'P2', 'P3', 'P4'];
 export const ITEM_TYPES: ItemType[] = ['INCIDENT', 'CUSTOMER_ISSUE', 'PAYMENT', 'ENGINEERING', 'COMPLIANCE', 'TASK'];

@@ -55,7 +55,8 @@ function EventRow({ e }: { e: ActivityEvent }) {
         </p>
         {e.type === 'PRIORITY_CHANGED' && (
           <p className="text-xs text-slate-500">
-            {PRIORITY_LABEL[p.from as keyof typeof PRIORITY_LABEL]} → {PRIORITY_LABEL[p.to as keyof typeof PRIORITY_LABEL]}
+            {PRIORITY_LABEL[p.from as keyof typeof PRIORITY_LABEL]} →{' '}
+            {PRIORITY_LABEL[p.to as keyof typeof PRIORITY_LABEL]}
           </p>
         )}
         {e.type === 'EDITED' && p.changes && (
@@ -63,7 +64,9 @@ function EventRow({ e }: { e: ActivityEvent }) {
             {Object.entries(p.changes as Record<string, { from: unknown; to: unknown }>).map(([field, ch]) => (
               <li key={field} className="truncate">
                 <span className="font-medium">{fieldLabel(field)}:</span>{' '}
-                {field === 'description' ? 'updated' : (
+                {field === 'description' ? (
+                  'updated'
+                ) : (
                   <>
                     <span className="line-through">{formatValue(field, ch.from)}</span> → {formatValue(field, ch.to)}
                   </>
@@ -77,7 +80,9 @@ function EventRow({ e }: { e: ActivityEvent }) {
             {p.resolution ? `Resolution: ${p.resolution}` : `“${p.reason}”`}
           </blockquote>
         )}
-        {p.approvalCleared && <p className="text-xs text-amber-700">Previous approval revoked — must be re-approved.</p>}
+        {p.approvalCleared && (
+          <p className="text-xs text-amber-700">Previous approval revoked — must be re-approved.</p>
+        )}
       </div>
     </li>
   );
@@ -111,7 +116,11 @@ export function Timeline({ itemId, canComment }: { itemId: string; canComment: b
 
   const comment = useMutation({
     mutationFn: (text: string) =>
-      api<ActivityEvent>(`/items/${itemId}/comments`, { method: 'POST', body: { body: text }, idempotencyKey: key.current }),
+      api<ActivityEvent>(`/items/${itemId}/comments`, {
+        method: 'POST',
+        body: { body: text },
+        idempotencyKey: key.current,
+      }),
     onSuccess: () => {
       setBody('');
       key.current = newIdempotencyKey(); // next comment is a new intent
@@ -128,7 +137,10 @@ export function Timeline({ itemId, canComment }: { itemId: string; canComment: b
     <section aria-label="Activity">
       <h2 className="mb-3 text-sm font-semibold text-slate-800">Activity</h2>
       {activity.hasNextPage && (
-        <button className="mb-3 text-xs font-medium text-brand-600 hover:underline" onClick={() => activity.fetchNextPage()}>
+        <button
+          className="mb-3 text-xs font-medium text-brand-600 hover:underline"
+          onClick={() => activity.fetchNextPage()}
+        >
           {activity.isFetchingNextPage ? 'Loading…' : 'Show earlier activity'}
         </button>
       )}
@@ -136,7 +148,9 @@ export function Timeline({ itemId, canComment }: { itemId: string; canComment: b
         <Spinner className="h-5 w-5 text-slate-400" />
       ) : (
         <ol className="relative before:absolute before:bottom-4 before:left-[15px] before:top-1 before:w-px before:bg-slate-200">
-          {events.map((e) => (e.type === 'COMMENTED' ? <CommentRow key={e.id} e={e} /> : <EventRow key={e.id} e={e} />))}
+          {events.map((e) =>
+            e.type === 'COMMENTED' ? <CommentRow key={e.id} e={e} /> : <EventRow key={e.id} e={e} />,
+          )}
         </ol>
       )}
       {canComment && (
@@ -154,7 +168,8 @@ export function Timeline({ itemId, canComment }: { itemId: string; canComment: b
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && body.trim() && !comment.isPending) comment.mutate(body);
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && body.trim() && !comment.isPending)
+                comment.mutate(body);
             }}
             aria-label="Comment"
           />
@@ -168,4 +183,3 @@ export function Timeline({ itemId, canComment }: { itemId: string; canComment: b
     </section>
   );
 }
-

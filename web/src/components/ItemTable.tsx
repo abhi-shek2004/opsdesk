@@ -37,7 +37,15 @@ export function ClaimButton({ item }: { item: Item }) {
   );
 }
 
-export function ItemTable({ items, showTeam = true, compact = false }: { items: Item[]; showTeam?: boolean; compact?: boolean }) {
+export function ItemTable({
+  items,
+  showTeam = true,
+  compact = false,
+}: {
+  items: Item[];
+  showTeam?: boolean;
+  compact?: boolean;
+}) {
   const navigate = useNavigate();
   return (
     <div className="overflow-x-auto">
@@ -84,7 +92,9 @@ export function ItemTable({ items, showTeam = true, compact = false }: { items: 
                   </span>
                   <DueBadge dueAt={item.dueAt} status={item.status} />
                   {item.requiresApproval && !item.approvedAt && item.status !== 'CANCELLED' && (
-                    <span className="rounded bg-amber-50 px-1.5 text-amber-700 ring-1 ring-amber-200 ring-inset">needs approval</span>
+                    <span className="rounded bg-amber-50 px-1.5 text-amber-700 ring-1 ring-amber-200 ring-inset">
+                      needs approval
+                    </span>
                   )}
                 </div>
               </td>
@@ -101,10 +111,15 @@ export function ItemTable({ items, showTeam = true, compact = false }: { items: 
                   <span className="text-slate-400">Unassigned</span>
                 )}
               </td>
-              <td className="hidden whitespace-nowrap px-2 py-2.5 align-top text-slate-500 lg:table-cell" title={item.updatedAt}>
+              <td
+                className="hidden whitespace-nowrap px-2 py-2.5 align-top text-slate-500 lg:table-cell"
+                title={item.updatedAt}
+              >
                 {relativeTime(item.updatedAt)}
               </td>
-              <td className="px-4 py-2 text-right align-top">{item.permissions.claim && <ClaimButton item={item} />}</td>
+              <td className="px-4 py-2 text-right align-top">
+                {item.permissions.claim && <ClaimButton item={item} />}
+              </td>
             </tr>
           ))}
         </tbody>

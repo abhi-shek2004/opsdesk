@@ -62,8 +62,7 @@ function permissionsFor(actor: Actor, item: ItemState, pendingRequestedBy?: stri
     unassign: !!item.ownerId && item.status !== 'PENDING_APPROVAL' && !closed && can.unassign(actor, item),
     comment: can.comment(actor, item),
     transitions: availableTransitions(actor, item),
-    decideApproval:
-      item.status === 'PENDING_APPROVAL' && can.decideApproval(actor, item, pendingRequestedBy),
+    decideApproval: item.status === 'PENDING_APPROVAL' && can.decideApproval(actor, item, pendingRequestedBy),
   };
 }
 
@@ -108,10 +107,10 @@ export async function loadItem(db: Db, actor: Actor, id: string) {
        WHERE a.work_item_id = $1 AND a.decided_at IS NULL`,
       [id],
     ),
-    db.query(
-      `SELECT count(*) AS watchers, bool_or(user_id = $2) AS watching FROM watchers WHERE work_item_id = $1`,
-      [id, actor.id],
-    ),
+    db.query(`SELECT count(*) AS watchers, bool_or(user_id = $2) AS watching FROM watchers WHERE work_item_id = $1`, [
+      id,
+      actor.id,
+    ]),
   ]);
   const p = pending.rows[0];
   return {
@@ -159,8 +158,18 @@ export interface ListFilters {
 }
 
 const SORTS: Record<SortKey, { order: string; cols: string[]; casts: string[]; dir: '<' | '>' }> = {
-  updated: { order: 'i.updated_at DESC, i.id DESC', cols: ['i.updated_at', 'i.id'], casts: ['timestamptz', 'uuid'], dir: '<' },
-  created: { order: 'i.created_at DESC, i.id DESC', cols: ['i.created_at', 'i.id'], casts: ['timestamptz', 'uuid'], dir: '<' },
+  updated: {
+    order: 'i.updated_at DESC, i.id DESC',
+    cols: ['i.updated_at', 'i.id'],
+    casts: ['timestamptz', 'uuid'],
+    dir: '<',
+  },
+  created: {
+    order: 'i.created_at DESC, i.id DESC',
+    cols: ['i.created_at', 'i.id'],
+    casts: ['timestamptz', 'uuid'],
+    dir: '<',
+  },
   priority: {
     order: 'i.priority ASC, i.created_at ASC, i.id ASC',
     cols: ['i.priority', 'i.created_at', 'i.id'],
@@ -239,15 +248,18 @@ export async function listItems(actor: Actor, f: ListFilters) {
     'i.resolved_at',
     `i.resolved_at, ${cursorCols}`,
   );
-  const { rows } = await pool.query(
-    `${select} ${whereSql} ORDER BY ${sort.order} LIMIT ${p(f.limit + 1)}`,
-    params,
-  );
+  const { rows } = await pool.query(`${select} ${whereSql} ORDER BY ${sort.order} LIMIT ${p(f.limit + 1)}`, params);
 
   const hasMore = rows.length > f.limit;
   const page = hasMore ? rows.slice(0, f.limit) : rows;
   const last = page[page.length - 1];
-  const nextCursor = hasMore && last ? encodeCursor(f.sort, sort.cols.map((_c, idx) => last[`_c${idx}`])) : null;
+  const nextCursor =
+    hasMore && last
+      ? encodeCursor(
+          f.sort,
+          sort.cols.map((_c, idx) => last[`_c${idx}`]),
+        )
+      : null;
 
   // Exact counts get expensive as history grows, and nobody needs "48,213" vs "48,214".
   // Count at most COUNT_CAP + 1 rows; the UI shows "1,000+" beyond that.
@@ -322,11 +334,10 @@ async function mutateItem(
          LEFT JOIN users u ON u.id = e.actor_id WHERE e.work_item_id = $1 ORDER BY e.id DESC LIMIT 1`,
         [itemId],
       );
-      throw conflict(
-        'VERSION_CONFLICT',
-        'This item was changed by someone else since you loaded it.',
-        { current, lastChange: last.rows[0] ?? null },
-      );
+      throw conflict('VERSION_CONFLICT', 'This item was changed by someone else since you loaded it.', {
+        current,
+        lastChange: last.rows[0] ?? null,
+      });
     }
 
     const change = await decide(row, state, tx);
@@ -339,10 +350,10 @@ async function mutateItem(
 
     if (cols.length) {
       const assignments = cols.map((c, idx) => `${c} = $${idx + 2}`).join(', ');
-      await tx.query(
-        `UPDATE work_items SET ${assignments}, version = version + 1, updated_at = now() WHERE id = $1`,
-        [itemId, ...cols.map((c) => set[c])],
-      );
+      await tx.query(`UPDATE work_items SET ${assignments}, version = version + 1, updated_at = now() WHERE id = $1`, [
+        itemId,
+        ...cols.map((c) => set[c]),
+      ]);
     } else {
       await tx.query('UPDATE work_items SET updated_at = now() WHERE id = $1', [itemId]);
     }
@@ -376,10 +387,10 @@ async function recordEvents(tx: Tx, actorId: string | null, itemId: string, even
 async function addWatchers(tx: Tx, itemId: string, userIds: (string | null | undefined)[]) {
   const ids = [...new Set(userIds.filter((x): x is string => !!x))];
   if (!ids.length) return;
-  await tx.query(
-    `INSERT INTO watchers(work_item_id, user_id) SELECT $1, unnest($2::uuid[]) ON CONFLICT DO NOTHING`,
-    [itemId, ids],
-  );
+  await tx.query(`INSERT INTO watchers(work_item_id, user_id) SELECT $1, unnest($2::uuid[]) ON CONFLICT DO NOTHING`, [
+    itemId,
+    ids,
+  ]);
 }
 
 function assertNotClosed(state: ItemState) {
@@ -452,7 +463,14 @@ export async function createItem(actor: Actor, input: CreateItemInput, idempoten
         },
       ]);
       await addWatchers(tx, id, [actor.id]);
-      await publish(tx, { kind: 'item', itemId: id, teamId: input.teamId, version: 1, actorId: actor.id, event: 'CREATED' });
+      await publish(tx, {
+        kind: 'item',
+        itemId: id,
+        teamId: input.teamId,
+        version: 1,
+        actorId: actor.id,
+        event: 'CREATED',
+      });
       return { status: 201, body: (await loadItem(tx, actor, id))! };
     }),
   );
@@ -500,7 +518,8 @@ export function updateItem(actor: Actor, id: string, version: number, patch: Upd
       }
     }
     if (patch.requiresApproval !== undefined && patch.requiresApproval !== row.requires_approval) {
-      if (!can.changeApprovalRequirement(actor, state)) throw forbidden('Only a team lead can change approval requirements.');
+      if (!can.changeApprovalRequirement(actor, state))
+        throw forbidden('Only a team lead can change approval requirements.');
       if (state.status === 'PENDING_APPROVAL')
         throw ruleViolation('APPROVAL_IN_PROGRESS', 'Cannot change approval requirement while approval is pending.');
       set.requires_approval = patch.requiresApproval;
@@ -565,7 +584,10 @@ export function assignItem(actor: Actor, id: string, version: number | undefined
       const events: EventSpec[] = [{ type: 'ASSIGNED', payload: { from, to: null } }];
       if (state.status === 'IN_PROGRESS' || state.status === 'BLOCKED') {
         set.status = 'OPEN';
-        events.push({ type: 'STATUS_CHANGED', payload: { from: row.status, to: 'OPEN', reason: 'Owner released the item' } });
+        events.push({
+          type: 'STATUS_CHANGED',
+          payload: { from: row.status, to: 'OPEN', reason: 'Owner released the item' },
+        });
       }
       return { set, events };
     }
@@ -679,7 +701,8 @@ export function decideApproval(actor: Actor, id: string, decision: 'APPROVED' | 
     if (state.ownerId === actor.id || state.createdBy === actor.id || pending.requested_by === actor.id) {
       throw new AppError(403, 'SELF_APPROVAL', 'You cannot approve or reject work you own, created or requested.');
     }
-    if (!can.decideApproval(actor, state, pending.requested_by)) throw forbidden('Only team leads can decide approvals.');
+    if (!can.decideApproval(actor, state, pending.requested_by))
+      throw forbidden('Only team leads can decide approvals.');
     if (decision === 'REJECTED' && !reason?.trim()) {
       throw ruleViolation('REASON_REQUIRED', 'A reason is required to reject.');
     }
@@ -695,7 +718,12 @@ export function decideApproval(actor: Actor, id: string, decision: 'APPROVED' | 
     }
     return {
       set,
-      events: [{ type: decision, payload: { reason: reason?.trim() || undefined, from: 'PENDING_APPROVAL', to: 'IN_PROGRESS' } }],
+      events: [
+        {
+          type: decision,
+          payload: { reason: reason?.trim() || undefined, from: 'PENDING_APPROVAL', to: 'IN_PROGRESS' },
+        },
+      ],
     };
   });
 }
@@ -716,7 +744,14 @@ export async function addComment(actor: Actor, id: string, body: string, idempot
       await enqueue(tx, 'notify', { eventId: ev.rows[0].id });
       await addWatchers(tx, id, [actor.id]);
       const version = (await tx.query('SELECT version FROM work_items WHERE id = $1', [id])).rows[0].version;
-      await publish(tx, { kind: 'item', itemId: id, teamId: rows[0].team_id, version, actorId: actor.id, event: 'COMMENTED' });
+      await publish(tx, {
+        kind: 'item',
+        itemId: id,
+        teamId: rows[0].team_id,
+        version,
+        actorId: actor.id,
+        event: 'COMMENTED',
+      });
       return {
         status: 201,
         body: {

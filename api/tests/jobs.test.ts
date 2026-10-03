@@ -126,9 +126,10 @@ describe('SLA scan', () => {
     const counts = await Promise.all([scanSla(), scanSla(), scanSla()]);
     expect(counts.reduce((a, b) => a + b, 0)).toBe(1);
     expect(await scanSla()).toBe(0);
-    const evs = await pool.query(`SELECT count(*) AS n FROM activity_events WHERE work_item_id = $1 AND type = 'SLA_BREACHED'`, [
-      item.id,
-    ]);
+    const evs = await pool.query(
+      `SELECT count(*) AS n FROM activity_events WHERE work_item_id = $1 AND type = 'SLA_BREACHED'`,
+      [item.id],
+    );
     expect(evs.rows[0].n).toBe(1);
   });
 

@@ -21,7 +21,12 @@ export async function resetDb() {
 
 export interface Client {
   userId: string;
-  request: (method: InjectOptions['method'], url: string, body?: unknown, headers?: Record<string, string>) => Promise<{
+  request: (
+    method: InjectOptions['method'],
+    url: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ) => Promise<{
     status: number;
     body: any;
     headers: Record<string, unknown>;
@@ -75,6 +80,9 @@ export async function createItem(client: Client, overrides: Record<string, unkno
 }
 
 export async function eventsFor(itemId: string): Promise<{ type: string; payload: any; actor_id: string | null }[]> {
-  return (await pool.query('SELECT type, payload, actor_id FROM activity_events WHERE work_item_id = $1 ORDER BY id', [itemId]))
-    .rows;
+  return (
+    await pool.query('SELECT type, payload, actor_id FROM activity_events WHERE work_item_id = $1 ORDER BY id', [
+      itemId,
+    ])
+  ).rows;
 }

@@ -20,11 +20,15 @@ function NavItem({ to, children, badge }: { to: string; children: ReactNode; bad
       to={to}
       aria-current={active ? 'page' : undefined}
       className={`flex items-center justify-between rounded-md px-3 py-1.5 text-sm ${
-        active ? 'bg-white font-medium text-slate-900 shadow-xs ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-200/60'
+        active
+          ? 'bg-white font-medium text-slate-900 shadow-xs ring-1 ring-slate-200'
+          : 'text-slate-600 hover:bg-slate-200/60'
       }`}
     >
       <span>{children}</span>
-      {!!badge && <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white">{badge}</span>}
+      {!!badge && (
+        <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white">{badge}</span>
+      )}
     </Link>
   );
 }
@@ -112,7 +116,9 @@ export function Layout() {
               }`}
             >
               <span className="truncate">{t.name}</span>
-              <span className="text-[10px] font-medium uppercase text-slate-400">{t.role?.toLowerCase() ?? 'admin'}</span>
+              <span className="text-[10px] font-medium uppercase text-slate-400">
+                {t.role?.toLowerCase() ?? 'admin'}
+              </span>
             </NavLink>
           ))}
         </div>
@@ -143,7 +149,11 @@ export function Layout() {
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur">
-          <button className="rounded p-1.5 text-slate-600 hover:bg-slate-100 md:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <button
+            className="rounded p-1.5 text-slate-600 hover:bg-slate-100 md:hidden"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+          >
             ☰
           </button>
           <form
@@ -168,7 +178,9 @@ export function Layout() {
               className={`hidden items-center gap-1.5 text-xs sm:flex ${live === 'live' ? 'text-emerald-600' : 'text-slate-400'}`}
               title={live === 'live' ? 'Receiving live updates' : 'Reconnecting… data may be stale'}
             >
-              <span className={`h-2 w-2 rounded-full ${live === 'live' ? 'bg-emerald-500' : 'animate-pulse bg-amber-400'}`} />
+              <span
+                className={`h-2 w-2 rounded-full ${live === 'live' ? 'bg-emerald-500' : 'animate-pulse bg-amber-400'}`}
+              />
               {live === 'live' ? 'Live' : 'Reconnecting'}
             </span>
             <NotificationBell />

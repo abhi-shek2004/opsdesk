@@ -20,7 +20,9 @@ export function describeEvent(type: string, p: Record<string, any>, actor: strin
     case 'PRIORITY_CHANGED':
       return `${who} changed priority ${p.from} → ${p.to}`;
     case 'EDITED':
-      return `${who} edited ${Object.keys(p.changes ?? {}).map(fieldLabel).join(', ')}`;
+      return `${who} edited ${Object.keys(p.changes ?? {})
+        .map(fieldLabel)
+        .join(', ')}`;
     case 'COMMENTED':
       return `${who} commented`;
     case 'APPROVAL_REQUESTED':
@@ -53,11 +55,15 @@ export function NotificationBell() {
     mutationFn: (body: { ids?: number[]; all?: boolean }) => api('/notifications/read', { method: 'POST', body }),
     onMutate: (body) => {
       // Optimistic: the badge drops immediately.
-      qc.setQueryData(qk.notifications, (old: typeof data) =>
-        old && {
-          unreadCount: body.all ? 0 : Math.max(0, old.unreadCount - (body.ids?.length ?? 0)),
-          notifications: old.notifications.map((n) => (body.all || body.ids?.includes(n.id) ? { ...n, read: true } : n)),
-        },
+      qc.setQueryData(
+        qk.notifications,
+        (old: typeof data) =>
+          old && {
+            unreadCount: body.all ? 0 : Math.max(0, old.unreadCount - (body.ids?.length ?? 0)),
+            notifications: old.notifications.map((n) =>
+              body.all || body.ids?.includes(n.id) ? { ...n, read: true } : n,
+            ),
+          },
       );
     },
     onSettled: () => qc.invalidateQueries({ queryKey: qk.notifications }),
@@ -84,7 +90,11 @@ export function NotificationBell() {
         aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+          />
         </svg>
         {unread > 0 && (
           <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-red-600 px-1 text-center text-[10px] font-bold leading-4 text-white">
@@ -97,19 +107,31 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
             <span className="text-sm font-semibold">Notifications</span>
             {unread > 0 && (
-              <button className="text-xs font-medium text-brand-600 hover:underline" onClick={() => markRead.mutate({ all: true })}>
+              <button
+                className="text-xs font-medium text-brand-600 hover:underline"
+                onClick={() => markRead.mutate({ all: true })}
+              >
                 Mark all read
               </button>
             )}
           </div>
           <ul className="max-h-[60vh] divide-y divide-slate-100 overflow-y-auto">
-            {data?.notifications.length === 0 && <li className="px-4 py-8 text-center text-sm text-slate-500">You're all caught up.</li>}
+            {data?.notifications.length === 0 && (
+              <li className="px-4 py-8 text-center text-sm text-slate-500">You're all caught up.</li>
+            )}
             {data?.notifications.map((n) => (
               <li key={n.id}>
-                <button className={`flex w-full gap-3 px-4 py-3 text-left hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/50'}`} onClick={() => go(n)}>
-                  <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-brand-600'}`} />
+                <button
+                  className={`flex w-full gap-3 px-4 py-3 text-left hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/50'}`}
+                  onClick={() => go(n)}
+                >
+                  <span
+                    className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-brand-600'}`}
+                  />
                   <span className="min-w-0">
-                    <span className="block text-sm text-slate-800">{describeEvent(n.type, n.payload, n.actorName)}</span>
+                    <span className="block text-sm text-slate-800">
+                      {describeEvent(n.type, n.payload, n.actorName)}
+                    </span>
                     <span className="block truncate text-xs text-slate-500">
                       <span className="font-mono">{n.item.key}</span> {n.item.title}
                     </span>

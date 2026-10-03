@@ -8,7 +8,10 @@ import { relativeTime } from '../lib/format';
 
 function Stat({ label, value, to, tone }: { label: string; value: number; to: string; tone: string }) {
   return (
-    <Link to={to} className="group rounded-lg border border-slate-200 bg-white p-4 shadow-xs transition hover:border-slate-300 hover:shadow-sm">
+    <Link
+      to={to}
+      className="group rounded-lg border border-slate-200 bg-white p-4 shadow-xs transition hover:border-slate-300 hover:shadow-sm"
+    >
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={`mt-1 text-3xl font-semibold tabular-nums ${value > 0 ? tone : 'text-slate-300'}`}>{value}</p>
       <p className="mt-1 text-xs text-brand-600 opacity-0 transition group-hover:opacity-100">View →</p>
@@ -59,17 +62,34 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label="My open work" value={c.myOpen} to="/items?owner=me&active=true&sort=priority" tone="text-slate-900" />
-        {isLead && <Stat label="Awaiting my approval" value={c.awaitingMyApproval} to="/approvals" tone="text-amber-600" />}
+        <Stat
+          label="My open work"
+          value={c.myOpen}
+          to="/items?owner=me&active=true&sort=priority"
+          tone="text-slate-900"
+        />
+        {isLead && (
+          <Stat label="Awaiting my approval" value={c.awaitingMyApproval} to="/approvals" tone="text-amber-600" />
+        )}
         <Stat label="Overdue" value={c.overdue} to="/items?overdue=true&sort=priority" tone="text-red-600" />
-        <Stat label="Unassigned P1/P2" value={c.unassignedUrgent} to="/items?owner=none&active=true&priority=P1,P2&sort=priority" tone="text-orange-600" />
+        <Stat
+          label="Unassigned P1/P2"
+          value={c.unassignedUrgent}
+          to="/items?owner=none&active=true&priority=P1,P2&sort=priority"
+          tone="text-orange-600"
+        />
         <Stat label="Blocked" value={c.blocked} to="/items?status=BLOCKED&sort=priority" tone="text-red-600" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           {data.overdue.length > 0 && (
-            <Section title="🔴 Overdue" items={data.overdue} to="/items?overdue=true&sort=priority" empty="Nothing overdue." />
+            <Section
+              title="🔴 Overdue"
+              items={data.overdue}
+              to="/items?overdue=true&sort=priority"
+              empty="Nothing overdue."
+            />
           )}
           {isLead && (
             <Section
@@ -85,11 +105,19 @@ export function DashboardPage() {
             to="/items?owner=none&active=true&priority=P1,P2&sort=priority"
             empty="Every urgent item has an owner."
           />
-          <Section title="My work" items={data.myWork} to="/items?owner=me&active=true&sort=priority" empty="You don't own any active work." />
+          <Section
+            title="My work"
+            items={data.myWork}
+            to="/items?owner=me&active=true&sort=priority"
+            empty="You don't own any active work."
+          />
         </div>
         <Card title="Recent activity on items you watch" className="self-start">
           {data.recentActivity.length === 0 ? (
-            <EmptyState title="No recent activity." hint="Items you create, own or comment on are watched automatically." />
+            <EmptyState
+              title="No recent activity."
+              hint="Items you create, own or comment on are watched automatically."
+            />
           ) : (
             <ul className="divide-y divide-slate-100">
               {data.recentActivity.map((e) => (

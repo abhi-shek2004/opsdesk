@@ -36,10 +36,7 @@ export const can = {
   /** Edit title/description/priority/due date/type. */
   editItem(actor: Actor, item: ItemState) {
     if (actor.isAdmin || atLeast(roleIn(actor, item.teamId), 'LEAD')) return true;
-    return (
-      atLeast(roleIn(actor, item.teamId), 'MEMBER') &&
-      (item.ownerId === actor.id || item.createdBy === actor.id)
-    );
+    return atLeast(roleIn(actor, item.teamId), 'MEMBER') && (item.ownerId === actor.id || item.createdBy === actor.id);
   },
 
   /** Toggling "requires approval" weakens a control, so it is lead-only. */

@@ -20,7 +20,9 @@ describe('state machine (pure)', () => {
     for (const from of STATUSES) {
       for (const to of STATUSES) {
         if (TRANSITIONS[from].includes(to)) continue;
-        expect(() => planTransition({ ...base, status: from }, to as Status, { reason: 'r', resolution: 'r' })).toThrow();
+        expect(() =>
+          planTransition({ ...base, status: from }, to as Status, { reason: 'r', resolution: 'r' }),
+        ).toThrow();
       }
     }
   });
@@ -69,7 +71,10 @@ describe('workflow through the API', () => {
     expect(item.requiresApproval).toBe(true);
 
     await rahul.request('POST', `/api/items/${item.id}/claim`);
-    const early = await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'RESOLVED', resolution: 'Paid' });
+    const early = await rahul.request('POST', `/api/items/${item.id}/transition`, {
+      to: 'RESOLVED',
+      resolution: 'Paid',
+    });
     expect(early.status).toBe(422);
     expect(early.body.error.code).toBe('APPROVAL_REQUIRED');
 
@@ -81,9 +86,9 @@ describe('workflow through the API', () => {
     expect(pending.body.pendingApproval.requestedBy.id).toBe(rahul.userId);
 
     // Owner cannot resolve while pending.
-    expect((await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'RESOLVED', resolution: 'x' })).status).toBe(
-      422,
-    );
+    expect(
+      (await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'RESOLVED', resolution: 'x' })).status,
+    ).toBe(422);
 
     const approved = await priya.request('POST', `/api/items/${item.id}/approval`, { decision: 'APPROVED' });
     expect(approved.status).toBe(200);
@@ -93,16 +98,29 @@ describe('workflow through the API', () => {
     // Deciding twice is rejected (already decided).
     expect((await priya.request('POST', `/api/items/${item.id}/approval`, { decision: 'APPROVED' })).status).toBe(409);
 
-    const resolved = await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'RESOLVED', resolution: 'Refund sent' });
+    const resolved = await rahul.request('POST', `/api/items/${item.id}/transition`, {
+      to: 'RESOLVED',
+      resolution: 'Refund sent',
+    });
     expect(resolved.body.status).toBe('RESOLVED');
     const closed = await priya.request('POST', `/api/items/${item.id}/transition`, { to: 'CLOSED' });
     expect(closed.body.status).toBe('CLOSED');
 
     // Closed items are read-only.
-    expect((await priya.request('PATCH', `/api/items/${item.id}`, { version: closed.body.version, title: 'x' })).status).toBe(422);
+    expect(
+      (await priya.request('PATCH', `/api/items/${item.id}`, { version: closed.body.version, title: 'x' })).status,
+    ).toBe(422);
 
     const types = (await eventsFor(item.id)).map((e) => e.type);
-    expect(types).toEqual(['CREATED', 'ASSIGNED', 'STATUS_CHANGED', 'APPROVAL_REQUESTED', 'APPROVED', 'STATUS_CHANGED', 'STATUS_CHANGED']);
+    expect(types).toEqual([
+      'CREATED',
+      'ASSIGNED',
+      'STATUS_CHANGED',
+      'APPROVAL_REQUESTED',
+      'APPROVED',
+      'STATUS_CHANGED',
+      'STATUS_CHANGED',
+    ]);
   });
 
   it('rejection requires a reason and sends work back', async () => {
@@ -111,7 +129,10 @@ describe('workflow through the API', () => {
     await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'IN_PROGRESS' });
     await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'PENDING_APPROVAL' });
     expect((await priya.request('POST', `/api/items/${item.id}/approval`, { decision: 'REJECTED' })).status).toBe(422);
-    const res = await priya.request('POST', `/api/items/${item.id}/approval`, { decision: 'REJECTED', reason: 'Wrong amount' });
+    const res = await priya.request('POST', `/api/items/${item.id}/approval`, {
+      decision: 'REJECTED',
+      reason: 'Wrong amount',
+    });
     expect(res.body.status).toBe('IN_PROGRESS');
     expect(res.body.approvedAt).toBeNull();
   });
@@ -123,7 +144,10 @@ describe('workflow through the API', () => {
     await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'PENDING_APPROVAL' });
     await priya.request('POST', `/api/items/${item.id}/approval`, { decision: 'APPROVED' });
     await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'RESOLVED', resolution: 'done' });
-    const reopened = await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'IN_PROGRESS', reason: 'Bounced' });
+    const reopened = await rahul.request('POST', `/api/items/${item.id}/transition`, {
+      to: 'IN_PROGRESS',
+      reason: 'Bounced',
+    });
     expect(reopened.body.approvedAt).toBeNull();
     expect(reopened.body.permissions.transitions).not.toContain('RESOLVED');
   });
@@ -149,7 +173,10 @@ describe('workflow through the API', () => {
     const rahul = await login('rahul');
     const item = await createItem(rahul);
     const claimed = await rahul.request('POST', `/api/items/${item.id}/claim`);
-    const released = await rahul.request('POST', `/api/items/${item.id}/assign`, { userId: null, version: claimed.body.version });
+    const released = await rahul.request('POST', `/api/items/${item.id}/assign`, {
+      userId: null,
+      version: claimed.body.version,
+    });
     expect(released.body.status).toBe('OPEN');
     expect(released.body.owner).toBeNull();
     await expect(
@@ -167,7 +194,10 @@ describe('listing at scale', () => {
     let cursor: string | null = null;
     let total = 0;
     do {
-      const res: any = await admin.request('GET', `/api/items?sort=priority&limit=7${cursor ? `&cursor=${cursor}` : ''}`);
+      const res: any = await admin.request(
+        'GET',
+        `/api/items?sort=priority&limit=7${cursor ? `&cursor=${cursor}` : ''}`,
+      );
       if (!cursor) total = res.body.total;
       for (const i of res.body.items) {
         expect(seen.has(i.id)).toBe(false);

@@ -18,7 +18,6 @@ declare module 'fastify' {
   }
 }
 
-
 const PUBLIC_ROUTES = new Set(['/api/auth/login', '/api/health']);
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -65,7 +64,9 @@ export async function buildApp(opts: { serveWeb?: boolean } = {}): Promise<Fasti
     }
     const pgCode = (err as { code?: string }).code;
     if (pgCode === '23505') {
-      return reply.status(409).send({ error: { code: 'DUPLICATE', message: 'That conflicts with an existing record.' } });
+      return reply
+        .status(409)
+        .send({ error: { code: 'DUPLICATE', message: 'That conflicts with an existing record.' } });
     }
     if (pgCode === '22P02' || pgCode === '22007' || pgCode === '22008') {
       return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Malformed value in request.' } });

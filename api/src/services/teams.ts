@@ -62,7 +62,10 @@ export async function removeMember(actor: Actor, teamId: string, userId: string)
     [teamId, userId],
   );
   if (owned.rows[0].n > 0) {
-    throw ruleViolation('MEMBER_OWNS_WORK', `This user still owns ${owned.rows[0].n} active item(s) in the team. Reassign them first.`);
+    throw ruleViolation(
+      'MEMBER_OWNS_WORK',
+      `This user still owns ${owned.rows[0].n} active item(s) in the team. Reassign them first.`,
+    );
   }
   await pool.query('DELETE FROM team_members WHERE team_id = $1 AND user_id = $2', [teamId, userId]);
   invalidateUser(userId); // this instance: immediately; others: via NOTIFY

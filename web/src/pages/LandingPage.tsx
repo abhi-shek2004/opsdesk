@@ -52,7 +52,12 @@ export function LandingShell({ active, dim, children }: { active?: string; dim?:
           </Link>
           <nav className="nav" aria-label="Primary">
             {NAV.map((n) => (
-              <Link key={n.label} to={n.to} className={active === n.label ? 'active' : ''} aria-current={active === n.label ? 'page' : undefined}>
+              <Link
+                key={n.label}
+                to={n.to}
+                className={active === n.label ? 'active' : ''}
+                aria-current={active === n.label ? 'page' : undefined}
+              >
                 {n.label}
               </Link>
             ))}
@@ -99,7 +104,17 @@ export function LandingShell({ active, dim, children }: { active?: string; dim?:
   );
 }
 
-function CountUp({ target, suffix, decimals, index }: { target: number; suffix: string; decimals: number; index: number }) {
+function CountUp({
+  target,
+  suffix,
+  decimals,
+  index,
+}: {
+  target: number;
+  suffix: string;
+  decimals: number;
+  index: number;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const [value, setValue] = useState(0);
 
@@ -117,16 +132,19 @@ function CountUp({ target, suffix, decimals, index }: { target: number; suffix: 
         if (!entries.some((e) => e.isIntersecting)) return;
         observer.disconnect(); // count once
         const duration = 1500 + index * 80;
-        timer = setTimeout(() => {
-          const start = performance.now();
-          const tick = (now: number) => {
-            const t = Math.min(1, (now - start) / duration);
-            const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-            setValue(target * eased);
-            if (t < 1) raf = requestAnimationFrame(tick);
-          };
-          raf = requestAnimationFrame(tick);
-        }, 480 + index * 90);
+        timer = setTimeout(
+          () => {
+            const start = performance.now();
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+              setValue(target * eased);
+              if (t < 1) raf = requestAnimationFrame(tick);
+            };
+            raf = requestAnimationFrame(tick);
+          },
+          480 + index * 90,
+        );
       },
       { threshold: 0.25 },
     );
@@ -182,8 +200,8 @@ export function LandingPage() {
         </h1>
 
         <p className="subhead anim" style={{ ['--d' as string]: '0.28s' }}>
-          Create, claim, approve and resolve operational work in one place — with clear ownership, a complete history and
-          live updates when teammates act at the same time.
+          Create, claim, approve and resolve operational work in one place — with clear ownership, a complete history
+          and live updates when teammates act at the same time.
         </p>
 
         <Link to="/login" className="cta anim" style={{ ['--d' as string]: '0.4s' }}>

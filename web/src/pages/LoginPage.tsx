@@ -48,11 +48,23 @@ export function LoginPage() {
             }}
           >
             <div>
-              <label className="label" htmlFor="email">Email</label>
-              <input id="email" className="input" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label className="label" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                className="input"
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div>
-              <label className="label" htmlFor="password">Password</label>
+              <label className="label" htmlFor="password">
+                Password
+              </label>
               <input
                 id="password"
                 className="input"
@@ -68,7 +80,12 @@ export function LoginPage() {
                 {login.error.message}
               </p>
             )}
-            <Button variant="primary" type="submit" className="w-full !rounded-full !bg-black hover:!bg-slate-800" loading={login.isPending}>
+            <Button
+              variant="primary"
+              type="submit"
+              className="w-full !rounded-full !bg-black hover:!bg-slate-800"
+              loading={login.isPending}
+            >
               Sign in
             </Button>
           </form>

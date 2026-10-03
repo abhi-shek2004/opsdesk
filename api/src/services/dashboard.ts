@@ -21,9 +21,7 @@ export async function getDashboard(actor: Actor) {
   // Admins see every team; everyone else sees their memberships (leads decide approvals).
   const allTeams = actor.isAdmin ? (await pool.query('SELECT id FROM teams')).rows.map((r) => r.id as string) : [];
   const teamIds = actor.isAdmin ? allTeams : [...actor.memberships.keys()];
-  const leadTeams = actor.isAdmin
-    ? allTeams
-    : [...actor.memberships].filter(([, r]) => r === 'LEAD').map(([t]) => t);
+  const leadTeams = actor.isAdmin ? allTeams : [...actor.memberships].filter(([, r]) => r === 'LEAD').map(([t]) => t);
   const me = actor.id;
 
   const [counts, mine, approvals, overdue, unassigned, recent] = await Promise.all([

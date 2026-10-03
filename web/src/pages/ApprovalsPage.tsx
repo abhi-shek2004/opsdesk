@@ -12,7 +12,8 @@ function Row({ a, onReject }: { a: ApprovalEntry; onReject: () => void }) {
   const qc = useQueryClient();
   const toast = useToast();
   const approve = useMutation({
-    mutationFn: () => api<ItemDetail>(`/items/${a.item.id}/approval`, { method: 'POST', body: { decision: 'APPROVED' } }),
+    mutationFn: () =>
+      api<ItemDetail>(`/items/${a.item.id}/approval`, { method: 'POST', body: { decision: 'APPROVED' } }),
     onSuccess: (item) => {
       qc.setQueryData(qk.item(item.id), item);
       toast(`Approved ${a.item.key}`, 'success');
@@ -32,7 +33,8 @@ function Row({ a, onReject }: { a: ApprovalEntry; onReject: () => void }) {
           </Link>
         </div>
         <p className="mt-1 text-xs text-slate-500">
-          {a.item.team.name} · {TYPE_LABEL[a.item.type]} · requested by <b>{a.requestedBy.name}</b> {relativeTime(a.requestedAt)}
+          {a.item.team.name} · {TYPE_LABEL[a.item.type]} · requested by <b>{a.requestedBy.name}</b>{' '}
+          {relativeTime(a.requestedAt)}
           {a.item.ownerName && a.item.ownerName !== a.requestedBy.name && <> · owner {a.item.ownerName}</>}
         </p>
         {a.note && <p className="mt-1 text-sm text-slate-700">“{a.note}”</p>}
@@ -50,7 +52,9 @@ function Row({ a, onReject }: { a: ApprovalEntry; onReject: () => void }) {
           </Button>
         </div>
       ) : (
-        <span className="shrink-0 text-xs text-slate-400">You're involved in this item — another lead must decide.</span>
+        <span className="shrink-0 text-xs text-slate-400">
+          You're involved in this item — another lead must decide.
+        </span>
       )}
     </li>
   );
@@ -123,14 +127,26 @@ export function ApprovalsPage() {
             <Button variant="ghost" onClick={() => setRejecting(null)}>
               Cancel
             </Button>
-            <Button variant="danger" disabled={!reason.trim()} loading={reject.isPending} onClick={() => rejecting && reject.mutate(rejecting)}>
+            <Button
+              variant="danger"
+              disabled={!reason.trim()}
+              loading={reject.isPending}
+              onClick={() => rejecting && reject.mutate(rejecting)}
+            >
               Reject
             </Button>
           </>
         }
       >
-        <label className="label" htmlFor="reject-reason">Reason (the owner will see this)</label>
-        <textarea id="reject-reason" className="input min-h-24" value={reason} onChange={(e) => setReason(e.target.value)} />
+        <label className="label" htmlFor="reject-reason">
+          Reason (the owner will see this)
+        </label>
+        <textarea
+          id="reject-reason"
+          className="input min-h-24"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
       </Modal>
     </div>
   );

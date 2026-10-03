@@ -72,7 +72,9 @@ export function useActivity(id: string) {
   return useInfiniteQuery({
     queryKey: qk.activity(id),
     queryFn: ({ pageParam }) =>
-      api<{ events: ActivityEvent[]; nextCursor: number | null }>(`/items/${id}/activity${qs({ before: pageParam, limit: 50 })}`),
+      api<{ events: ActivityEvent[]; nextCursor: number | null }>(
+        `/items/${id}/activity${qs({ before: pageParam, limit: 50 })}`,
+      ),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });

@@ -95,11 +95,19 @@ describe('role-based permissions', () => {
 
     expect((await vera.request('GET', `/api/items/${item.id}`)).status).toBe(200);
     expect((await vera.request('POST', `/api/items/${item.id}/comments`, { body: 'FYI' })).status).toBe(201);
-    expect((await vera.request('PATCH', `/api/items/${item.id}`, { version: item.version, title: 'x' })).status).toBe(403);
+    expect((await vera.request('PATCH', `/api/items/${item.id}`, { version: item.version, title: 'x' })).status).toBe(
+      403,
+    );
     expect((await vera.request('POST', `/api/items/${item.id}/claim`)).status).toBe(403);
     expect(
-      (await vera.request('POST', '/api/items', { teamId: await teamId('PAY'), type: 'TASK', title: 'x', priority: 'P3' }))
-        .status,
+      (
+        await vera.request('POST', '/api/items', {
+          teamId: await teamId('PAY'),
+          type: 'TASK',
+          title: 'x',
+          priority: 'P3',
+        })
+      ).status,
     ).toBe(403);
   });
 
@@ -114,9 +122,9 @@ describe('role-based permissions', () => {
     const [rahul, alex, priya] = await Promise.all([login('rahul'), login('alex'), login('priya')]);
     const item = await createItem(rahul);
     expect((await rahul.request('POST', `/api/items/${item.id}/assign`, { userId: alex.userId })).status).toBe(403);
-    expect((await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'CANCELLED', reason: 'dup' })).status).toBe(
-      403,
-    );
+    expect(
+      (await rahul.request('POST', `/api/items/${item.id}/transition`, { to: 'CANCELLED', reason: 'dup' })).status,
+    ).toBe(403);
     expect((await priya.request('POST', `/api/items/${item.id}/assign`, { userId: alex.userId })).status).toBe(200);
   });
 
@@ -142,7 +150,10 @@ describe('role-based permissions', () => {
     const rahul = await login('rahul');
     const item = await createItem(rahul, { type: 'PAYMENT', requiresApproval: false });
     expect(item.requiresApproval).toBe(true);
-    const res = await rahul.request('PATCH', `/api/items/${item.id}`, { version: item.version, requiresApproval: false });
+    const res = await rahul.request('PATCH', `/api/items/${item.id}`, {
+      version: item.version,
+      requiresApproval: false,
+    });
     expect(res.status).toBe(403);
   });
 

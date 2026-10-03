@@ -27,7 +27,9 @@ const item = (over: Partial<ItemDetail> = {}): ItemDetail =>
 
 describe('nextStep', () => {
   it('asks for an owner when nobody owns the work', () => {
-    expect(nextStep(item({ owner: null, status: 'OPEN', permissions: { ...perms, claim: true } }), 'u2')?.text).toMatch(/Claim it/);
+    expect(nextStep(item({ owner: null, status: 'OPEN', permissions: { ...perms, claim: true } }), 'u2')?.text).toMatch(
+      /Claim it/,
+    );
   });
 
   it('tells the owner to request approval on gated work, and others that it is waiting', () => {

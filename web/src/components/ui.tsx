@@ -55,7 +55,9 @@ const STATUS_STYLE: Record<Status, string> = {
 
 export function StatusBadge({ status }: { status: Status }) {
   return (
-    <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLE[status]}`}>
+    <span
+      className={`inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLE[status]}`}
+    >
       {STATUS_LABEL[status]}
     </span>
   );
@@ -70,7 +72,9 @@ const PRIORITY_STYLE: Record<Priority, string> = {
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
   return (
-    <span className={`inline-flex w-7 justify-center rounded px-1 py-0.5 text-[11px] font-bold tabular-nums ${PRIORITY_STYLE[priority]}`}>
+    <span
+      className={`inline-flex w-7 justify-center rounded px-1 py-0.5 text-[11px] font-bold tabular-nums ${PRIORITY_STYLE[priority]}`}
+    >
       {priority}
     </span>
   );
@@ -85,9 +89,15 @@ export function DueBadge({ dueAt, status }: { dueAt: string | null; status: Stat
     normal: 'text-slate-600 bg-white ring-slate-200',
   }[d.tone];
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs ring-1 ring-inset ${tone}`}>
+    <span
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs ring-1 ring-inset ${tone}`}
+    >
       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-        <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .2.08.39.22.53l3 3a.75.75 0 1 0 1.06-1.06l-2.78-2.78V5Z" clipRule="evenodd" />
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .2.08.39.22.53l3 3a.75.75 0 1 0 1.06-1.06l-2.78-2.78V5Z"
+          clipRule="evenodd"
+        />
       </svg>
       {d.text}
     </span>
@@ -116,7 +126,17 @@ export function Avatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md'
   );
 }
 
-export function Card({ title, action, children, className = '' }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Card({
+  title,
+  action,
+  children,
+  className = '',
+}: {
+  title?: ReactNode;
+  action?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <section className={`rounded-lg border border-slate-200 bg-white shadow-xs ${className}`}>
       {title && (
@@ -177,7 +197,10 @@ export function Modal({
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 pt-[10vh]" onMouseDown={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 pt-[10vh]"
+      onMouseDown={onClose}
+    >
       <div
         ref={ref}
         role="dialog"
@@ -187,12 +210,20 @@ export function Modal({
       >
         <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600" onClick={onClose} aria-label="Close">
+          <button
+            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            onClick={onClose}
+            aria-label="Close"
+          >
             ✕
           </button>
         </header>
         <div className="px-5 py-4">{children}</div>
-        {footer && <footer className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3 rounded-b-xl">{footer}</footer>}
+        {footer && (
+          <footer className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3 rounded-b-xl">
+            {footer}
+          </footer>
+        )}
       </div>
     </div>
   );

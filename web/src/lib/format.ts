@@ -19,7 +19,12 @@ export const TYPE_LABEL: Record<ItemType, string> = {
   TASK: 'Task',
 };
 
-export const PRIORITY_LABEL: Record<Priority, string> = { P1: 'P1 · Critical', P2: 'P2 · High', P3: 'P3 · Normal', P4: 'P4 · Low' };
+export const PRIORITY_LABEL: Record<Priority, string> = {
+  P1: 'P1 · Critical',
+  P2: 'P2 · High',
+  P3: 'P3 · Normal',
+  P4: 'P4 · Low',
+};
 
 /** Label used on the action button that performs a transition. */
 export function transitionVerb(from: Status, to: Status): string {
@@ -61,7 +66,10 @@ export function relativeTime(iso: string | Date, now = Date.now()): string {
   return rtf.format(Math.round(diff / unit[1]), unit[0]);
 }
 
-export function dueLabel(dueAt: string | null, status: Status): { text: string; tone: 'overdue' | 'soon' | 'normal' } | null {
+export function dueLabel(
+  dueAt: string | null,
+  status: Status,
+): { text: string; tone: 'overdue' | 'soon' | 'normal' } | null {
   if (!dueAt || ['RESOLVED', 'CLOSED', 'CANCELLED'].includes(status)) return null;
   const ms = new Date(dueAt).getTime() - Date.now();
   if (ms < 0) return { text: `Overdue ${relativeTime(dueAt).replace(' ago', '')}`, tone: 'overdue' };

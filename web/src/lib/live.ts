@@ -55,7 +55,10 @@ export function useLiveUpdates(myId: string | undefined): LiveStatus {
     es.addEventListener('item', (e) => {
       const change = JSON.parse((e as MessageEvent).data) as ItemChange;
       const cached = qc.getQueryData<ItemDetail>(qk.item(change.itemId));
-      if (cached && (cached.version < change.version || change.event === 'COMMENTED' || change.event === 'SLA_BREACHED')) {
+      if (
+        cached &&
+        (cached.version < change.version || change.event === 'COMMENTED' || change.event === 'SLA_BREACHED')
+      ) {
         qc.invalidateQueries({ queryKey: qk.item(change.itemId) });
       }
       qc.invalidateQueries({ queryKey: qk.activity(change.itemId) });

@@ -50,7 +50,11 @@ function assertNotThrottled(email: string, ip: string) {
     const list = recent(key, now);
     if (list.length >= limitFor(key)) {
       const minutes = Math.ceil((config.login.windowMs - (now - list[0])) / 60_000);
-      throw new AppError(429, 'TOO_MANY_ATTEMPTS', `Too many failed sign-in attempts. Try again in ${minutes} minute(s).`);
+      throw new AppError(
+        429,
+        'TOO_MANY_ATTEMPTS',
+        `Too many failed sign-in attempts. Try again in ${minutes} minute(s).`,
+      );
     }
   }
 }
@@ -64,9 +68,15 @@ export function resetLoginThrottle() {
   failures.clear();
 }
 
-export async function login(email: string, password: string, ip = 'unknown'): Promise<{ token: string; expiresAt: Date }> {
+export async function login(
+  email: string,
+  password: string,
+  ip = 'unknown',
+): Promise<{ token: string; expiresAt: Date }> {
   assertNotThrottled(email, ip);
-  const { rows } = await pool.query('SELECT id, password_hash FROM users WHERE lower(email) = lower($1)', [email.trim()]);
+  const { rows } = await pool.query('SELECT id, password_hash FROM users WHERE lower(email) = lower($1)', [
+    email.trim(),
+  ]);
   const user = rows[0];
   const ok = await bcrypt.compare(password, user?.password_hash ?? DUMMY_HASH);
   if (!user || !ok) {

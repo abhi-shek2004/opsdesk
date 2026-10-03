@@ -30,16 +30,76 @@ export const DEMO_USERS: { email: string; name: string; admin?: boolean; teams: 
   { email: 'vera@opsdesk.dev', name: 'Vera Auditor', teams: { PAY: 'VIEWER', ENG: 'VIEWER', CMP: 'VIEWER' } },
 ];
 
-const FIRST = ['Aisha', 'Ben', 'Chloe', 'Diego', 'Elena', 'Farhan', 'Grace', 'Hiro', 'Ines', 'Jamal', 'Kavya', 'Liam', 'Mei', 'Noah', 'Olu', 'Pooja', 'Quinn', 'Ravi', 'Sara', 'Tomas'];
+const FIRST = [
+  'Aisha',
+  'Ben',
+  'Chloe',
+  'Diego',
+  'Elena',
+  'Farhan',
+  'Grace',
+  'Hiro',
+  'Ines',
+  'Jamal',
+  'Kavya',
+  'Liam',
+  'Mei',
+  'Noah',
+  'Olu',
+  'Pooja',
+  'Quinn',
+  'Ravi',
+  'Sara',
+  'Tomas',
+];
 const LAST = ['Khan', 'Nair', 'Smith', 'Lopez', 'Ivanova', 'Rao', 'Kim', 'Tanaka', 'Silva', 'Brown'];
 
 const TITLES: Record<string, string[]> = {
-  PAYMENT: ['Refund failed for order #{n}', 'Chargeback dispute from merchant {m}', 'Duplicate charge reported by customer #{n}', 'Payout delayed to merchant {m}', 'Settlement mismatch on {d} batch', 'Manual refund of ₹{amt} requested'],
-  INCIDENT: ['Checkout latency spike in {region}', '{svc} returning 5xx errors', 'Queue backlog growing on {svc}', 'Login failures for {pct}% of users', 'Webhook deliveries failing to {m}', 'Database CPU at 95% on {svc}'],
-  CUSTOMER_ISSUE: ['Customer #{n} cannot reset password', 'Invoice PDF missing line items for #{n}', 'Enterprise client {m} reports missing data', 'Customer #{n} charged in wrong currency', 'Account locked after KYC update #{n}'],
-  ENGINEERING: ['Upgrade {svc} to latest runtime', 'Flaky test in {svc} pipeline', 'Add rate limiting to {svc}', 'Investigate memory leak in {svc}', 'Rotate credentials for {svc}', 'Remove deprecated {svc} endpoint'],
-  COMPLIANCE: ['Data deletion request from customer #{n}', 'Quarterly access review for {svc}', 'Audit evidence for SOC2 control {c}', 'Sanctions screening hit on merchant {m}', 'GDPR export request #{n}'],
-  TASK: ['Onboard new vendor {m}', 'Provision access for new hire in {region}', 'Update runbook for {svc}', 'Renew SSL certificate for {svc}', 'Schedule maintenance window for {svc}'],
+  PAYMENT: [
+    'Refund failed for order #{n}',
+    'Chargeback dispute from merchant {m}',
+    'Duplicate charge reported by customer #{n}',
+    'Payout delayed to merchant {m}',
+    'Settlement mismatch on {d} batch',
+    'Manual refund of ₹{amt} requested',
+  ],
+  INCIDENT: [
+    'Checkout latency spike in {region}',
+    '{svc} returning 5xx errors',
+    'Queue backlog growing on {svc}',
+    'Login failures for {pct}% of users',
+    'Webhook deliveries failing to {m}',
+    'Database CPU at 95% on {svc}',
+  ],
+  CUSTOMER_ISSUE: [
+    'Customer #{n} cannot reset password',
+    'Invoice PDF missing line items for #{n}',
+    'Enterprise client {m} reports missing data',
+    'Customer #{n} charged in wrong currency',
+    'Account locked after KYC update #{n}',
+  ],
+  ENGINEERING: [
+    'Upgrade {svc} to latest runtime',
+    'Flaky test in {svc} pipeline',
+    'Add rate limiting to {svc}',
+    'Investigate memory leak in {svc}',
+    'Rotate credentials for {svc}',
+    'Remove deprecated {svc} endpoint',
+  ],
+  COMPLIANCE: [
+    'Data deletion request from customer #{n}',
+    'Quarterly access review for {svc}',
+    'Audit evidence for SOC2 control {c}',
+    'Sanctions screening hit on merchant {m}',
+    'GDPR export request #{n}',
+  ],
+  TASK: [
+    'Onboard new vendor {m}',
+    'Provision access for new hire in {region}',
+    'Update runbook for {svc}',
+    'Renew SSL certificate for {svc}',
+    'Schedule maintenance window for {svc}',
+  ],
 };
 const SVCS = ['payments-api', 'ledger', 'auth-service', 'checkout', 'notifications', 'search', 'billing', 'reporting'];
 const MERCHANTS = ['Acme Retail', 'BlueKart', 'Zenith Travel', 'Nova Foods', 'Orbit Media', 'Kite Logistics'];
@@ -91,7 +151,9 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
 
   const teamIds = {} as Record<TeamKey, string>;
   for (const t of TEAMS) {
-    teamIds[t.key] = (await db.query('INSERT INTO teams(name, key) VALUES ($1, $2) RETURNING id', [t.name, t.key])).rows[0].id;
+    teamIds[t.key] = (
+      await db.query('INSERT INTO teams(name, key) VALUES ($1, $2) RETURNING id', [t.name, t.key])
+    ).rows[0].id;
   }
 
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
@@ -127,17 +189,42 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
   const now = Date.now();
   const H = 3600_000;
   const cols = {
-    team: [] as string[], number: [] as number[], key: [] as string[], type: [] as string[], title: [] as string[],
-    description: [] as string[], status: [] as string[], priority: [] as string[], owner: [] as (string | null)[],
-    createdBy: [] as string[], requiresApproval: [] as boolean[], approvedAt: [] as (Date | null)[],
-    approvedBy: [] as (string | null)[], resolution: [] as (string | null)[], dueAt: [] as (Date | null)[],
-    sla: [] as (Date | null)[], createdAt: [] as Date[], updatedAt: [] as Date[], resolvedAt: [] as (Date | null)[],
+    team: [] as string[],
+    number: [] as number[],
+    key: [] as string[],
+    type: [] as string[],
+    title: [] as string[],
+    description: [] as string[],
+    status: [] as string[],
+    priority: [] as string[],
+    owner: [] as (string | null)[],
+    createdBy: [] as string[],
+    requiresApproval: [] as boolean[],
+    approvedAt: [] as (Date | null)[],
+    approvedBy: [] as (string | null)[],
+    resolution: [] as (string | null)[],
+    dueAt: [] as (Date | null)[],
+    sla: [] as (Date | null)[],
+    createdAt: [] as Date[],
+    updatedAt: [] as Date[],
+    resolvedAt: [] as (Date | null)[],
   };
 
   const add = (it: {
-    team: TeamKey; type: string; title: string; description?: string; status: string; priority: string;
-    owner?: string | null; createdBy: string; requiresApproval?: boolean; approvedBy?: string | null;
-    dueAt?: Date | null; sla?: boolean; createdAt: Date; updatedAt?: Date;
+    team: TeamKey;
+    type: string;
+    title: string;
+    description?: string;
+    status: string;
+    priority: string;
+    owner?: string | null;
+    createdBy: string;
+    requiresApproval?: boolean;
+    approvedBy?: string | null;
+    dueAt?: Date | null;
+    sla?: boolean;
+    createdAt: Date;
+    updatedAt?: Date;
   }) => {
     const n = ++counters[it.team];
     const resolved = ['RESOLVED', 'CLOSED'].includes(it.status);
@@ -147,7 +234,10 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
     cols.key.push(`${it.team}-${n}`);
     cols.type.push(it.type);
     cols.title.push(it.title);
-    cols.description.push(it.description ?? `Reported via ${pick(['chat', 'email', 'phone', 'on-call page', 'support ticket'])}. ${pick(COMMENTS)}`);
+    cols.description.push(
+      it.description ??
+        `Reported via ${pick(['chat', 'email', 'phone', 'on-call page', 'support ticket'])}. ${pick(COMMENTS)}`,
+    );
     cols.status.push(it.status);
     cols.priority.push(it.priority);
     cols.owner.push(it.owner ?? null);
@@ -155,7 +245,9 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
     cols.requiresApproval.push(!!it.requiresApproval);
     cols.approvedAt.push(it.approvedBy ? updatedAt : null);
     cols.approvedBy.push(it.approvedBy ?? null);
-    cols.resolution.push(resolved ? pick(['Fixed and verified.', 'Refund processed.', 'Customer confirmed.', 'Config corrected.']) : null);
+    cols.resolution.push(
+      resolved ? pick(['Fixed and verified.', 'Refund processed.', 'Customer confirmed.', 'Config corrected.']) : null,
+    );
     cols.dueAt.push(it.dueAt ?? null);
     // Only work whose deadline has already passed is breached (the worker flags it at the due time).
     cols.sla.push(it.sla && it.dueAt && it.dueAt.getTime() < now ? it.dueAt : null);
@@ -166,17 +258,110 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
 
   // ── Hand-written scenarios for the demo ──
   const u = (e: string) => userIds[`${e}@opsdesk.dev`];
-  add({ team: 'PAY', type: 'PAYMENT', title: 'Customer #88123 charged twice — refund stuck at bank', status: 'IN_PROGRESS', priority: 'P1', owner: u('rahul'), createdBy: u('rahul'), requiresApproval: true, dueAt: new Date(now + 3 * H), createdAt: new Date(now - 5 * H), updatedAt: new Date(now - 1 * H), description: 'Customer paid twice for order #88123 (₹12,499). Automatic refund failed with bank error R05. Needs a manual refund, which requires lead approval.' });
-  add({ team: 'PAY', type: 'PAYMENT', title: 'Manual refund of ₹40,000 to Acme Retail', status: 'PENDING_APPROVAL', priority: 'P2', owner: u('rahul'), createdBy: u('rahul'), requiresApproval: true, dueAt: new Date(now + 20 * H), createdAt: new Date(now - 26 * H), updatedAt: new Date(now - 2 * H), description: 'Settlement error on 14 Sep batch. Finance confirmed the amount. Requesting approval to issue a manual refund.' });
-  add({ team: 'PAY', type: 'CUSTOMER_ISSUE', title: 'Merchant BlueKart reports missing payouts since Monday', status: 'OPEN', priority: 'P2', createdBy: u('priya'), dueAt: new Date(now + 6 * H), createdAt: new Date(now - 3 * H) });
-  add({ team: 'ENG', type: 'INCIDENT', title: 'Checkout returning 500 for ~3% of requests', status: 'OPEN', priority: 'P1', createdBy: u('sam'), dueAt: new Date(now + 0.5 * H), createdAt: new Date(now - 0.3 * H), description: 'Error rate on /checkout jumped from 0.1% to 3% at 14:05. Correlates with the payments-api deploy. Needs an owner NOW.' });
-  add({ team: 'ENG', type: 'ENGINEERING', title: 'Ledger reconciliation job exceeds its 2h window', status: 'BLOCKED', priority: 'P2', owner: u('alex'), createdBy: u('sam'), createdAt: new Date(now - 50 * H), updatedAt: new Date(now - 4 * H), dueAt: new Date(now - 2 * H) });
-  add({ team: 'OPS', type: 'TASK', title: 'Provision laptop and access for 6 new hires (Mumbai)', status: 'IN_PROGRESS', priority: 'P3', owner: u('dev'), createdBy: u('maria'), createdAt: new Date(now - 30 * H), updatedAt: new Date(now - 6 * H), dueAt: new Date(now + 48 * H) });
-  add({ team: 'CMP', type: 'COMPLIANCE', title: 'GDPR data deletion request from customer #55102', status: 'OPEN', priority: 'P2', createdBy: u('maria'), requiresApproval: true, dueAt: new Date(now + 72 * H), createdAt: new Date(now - 10 * H) });
+  add({
+    team: 'PAY',
+    type: 'PAYMENT',
+    title: 'Customer #88123 charged twice — refund stuck at bank',
+    status: 'IN_PROGRESS',
+    priority: 'P1',
+    owner: u('rahul'),
+    createdBy: u('rahul'),
+    requiresApproval: true,
+    dueAt: new Date(now + 3 * H),
+    createdAt: new Date(now - 5 * H),
+    updatedAt: new Date(now - 1 * H),
+    description:
+      'Customer paid twice for order #88123 (₹12,499). Automatic refund failed with bank error R05. Needs a manual refund, which requires lead approval.',
+  });
+  add({
+    team: 'PAY',
+    type: 'PAYMENT',
+    title: 'Manual refund of ₹40,000 to Acme Retail',
+    status: 'PENDING_APPROVAL',
+    priority: 'P2',
+    owner: u('rahul'),
+    createdBy: u('rahul'),
+    requiresApproval: true,
+    dueAt: new Date(now + 20 * H),
+    createdAt: new Date(now - 26 * H),
+    updatedAt: new Date(now - 2 * H),
+    description:
+      'Settlement error on 14 Sep batch. Finance confirmed the amount. Requesting approval to issue a manual refund.',
+  });
+  add({
+    team: 'PAY',
+    type: 'CUSTOMER_ISSUE',
+    title: 'Merchant BlueKart reports missing payouts since Monday',
+    status: 'OPEN',
+    priority: 'P2',
+    createdBy: u('priya'),
+    dueAt: new Date(now + 6 * H),
+    createdAt: new Date(now - 3 * H),
+  });
+  add({
+    team: 'ENG',
+    type: 'INCIDENT',
+    title: 'Checkout returning 500 for ~3% of requests',
+    status: 'OPEN',
+    priority: 'P1',
+    createdBy: u('sam'),
+    dueAt: new Date(now + 0.5 * H),
+    createdAt: new Date(now - 0.3 * H),
+    description:
+      'Error rate on /checkout jumped from 0.1% to 3% at 14:05. Correlates with the payments-api deploy. Needs an owner NOW.',
+  });
+  add({
+    team: 'ENG',
+    type: 'ENGINEERING',
+    title: 'Ledger reconciliation job exceeds its 2h window',
+    status: 'BLOCKED',
+    priority: 'P2',
+    owner: u('alex'),
+    createdBy: u('sam'),
+    createdAt: new Date(now - 50 * H),
+    updatedAt: new Date(now - 4 * H),
+    dueAt: new Date(now - 2 * H),
+  });
+  add({
+    team: 'OPS',
+    type: 'TASK',
+    title: 'Provision laptop and access for 6 new hires (Mumbai)',
+    status: 'IN_PROGRESS',
+    priority: 'P3',
+    owner: u('dev'),
+    createdBy: u('maria'),
+    createdAt: new Date(now - 30 * H),
+    updatedAt: new Date(now - 6 * H),
+    dueAt: new Date(now + 48 * H),
+  });
+  add({
+    team: 'CMP',
+    type: 'COMPLIANCE',
+    title: 'GDPR data deletion request from customer #55102',
+    status: 'OPEN',
+    priority: 'P2',
+    createdBy: u('maria'),
+    requiresApproval: true,
+    dueAt: new Date(now + 72 * H),
+    createdAt: new Date(now - 10 * H),
+  });
   const handWritten = cols.key.length;
 
   // ── Bulk realistic history ──
-  const statusWheel = ['OPEN', 'OPEN', 'IN_PROGRESS', 'IN_PROGRESS', 'BLOCKED', 'RESOLVED', 'RESOLVED', 'CLOSED', 'CLOSED', 'CLOSED', 'CLOSED', 'CANCELLED'];
+  const statusWheel = [
+    'OPEN',
+    'OPEN',
+    'IN_PROGRESS',
+    'IN_PROGRESS',
+    'BLOCKED',
+    'RESOLVED',
+    'RESOLVED',
+    'CLOSED',
+    'CLOSED',
+    'CLOSED',
+    'CLOSED',
+    'CANCELLED',
+  ];
   for (let i = 0; i < itemCount - handWritten; i++) {
     const team = pick(TEAMS).key;
     const members = membersByTeam[team].filter((m) => m.role !== 'VIEWER');
@@ -188,17 +373,26 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
     if (requiresApproval && status === 'IN_PROGRESS' && rand() < 0.25) status = 'PENDING_APPROVAL';
     const createdAt = new Date(now - rand() * 120 * 24 * H);
     const updatedAt = new Date(createdAt.getTime() + rand() * (now - createdAt.getTime()));
-    const owner = status === 'OPEN' ? (rand() < 0.3 ? pick(members).id : null) : status === 'CANCELLED' ? null : pick(members).id;
+    const owner =
+      status === 'OPEN' ? (rand() < 0.3 ? pick(members).id : null) : status === 'CANCELLED' ? null : pick(members).id;
     const active = ['OPEN', 'IN_PROGRESS', 'BLOCKED', 'PENDING_APPROVAL'].includes(status);
     let dueAt: Date | null = null;
     if (active && rand() < 0.4) dueAt = new Date(now + (rand() < 0.08 ? -1 : 1) * rand() * 7 * 24 * H);
     const approver = leads.find((l) => l.id !== owner)?.id ?? null;
     add({
-      team, type, title: fill(pick(TITLES[type])), status,
+      team,
+      type,
+      title: fill(pick(TITLES[type])),
+      status,
       priority: pick(['P1', 'P2', 'P2', 'P3', 'P3', 'P3', 'P4', 'P4']),
-      owner, createdBy: pick(members).id, requiresApproval,
+      owner,
+      createdBy: pick(members).id,
+      requiresApproval,
       approvedBy: requiresApproval && ['RESOLVED', 'CLOSED'].includes(status) ? approver : null,
-      dueAt, sla: true, createdAt, updatedAt,
+      dueAt,
+      sla: true,
+      createdAt,
+      updatedAt,
     });
   }
 
@@ -212,12 +406,31 @@ export async function seedDatabase(db: Db, opts: { items?: number; quiet?: boole
        SELECT * FROM unnest($1::uuid[], $2::int[], $3::text[], $4::item_type[], $5::text[], $6::text[], $7::item_status[],
          $8::item_priority[], $9::uuid[], $10::uuid[], $11::bool[], $12::timestamptz[], $13::uuid[], $14::text[],
          $15::timestamptz[], $16::timestamptz[], $17::timestamptz[], $18::timestamptz[], $19::timestamptz[])`,
-      [sl(cols.team), sl(cols.number), sl(cols.key), sl(cols.type), sl(cols.title), sl(cols.description), sl(cols.status),
-       sl(cols.priority), sl(cols.owner), sl(cols.createdBy), sl(cols.requiresApproval), sl(cols.approvedAt), sl(cols.approvedBy),
-       sl(cols.resolution), sl(cols.dueAt), sl(cols.sla), sl(cols.createdAt), sl(cols.updatedAt), sl(cols.resolvedAt)],
+      [
+        sl(cols.team),
+        sl(cols.number),
+        sl(cols.key),
+        sl(cols.type),
+        sl(cols.title),
+        sl(cols.description),
+        sl(cols.status),
+        sl(cols.priority),
+        sl(cols.owner),
+        sl(cols.createdBy),
+        sl(cols.requiresApproval),
+        sl(cols.approvedAt),
+        sl(cols.approvedBy),
+        sl(cols.resolution),
+        sl(cols.dueAt),
+        sl(cols.sla),
+        sl(cols.createdAt),
+        sl(cols.updatedAt),
+        sl(cols.resolvedAt),
+      ],
     );
   }
-  for (const t of TEAMS) await db.query('UPDATE teams SET next_number = $2 WHERE id = $1', [teamIds[t.key], counters[t.key] + 1]);
+  for (const t of TEAMS)
+    await db.query('UPDATE teams SET next_number = $2 WHERE id = $1', [teamIds[t.key], counters[t.key] + 1]);
   log(`${cols.key.length} work items`);
 
   // ── History consistent with each item's current state ──

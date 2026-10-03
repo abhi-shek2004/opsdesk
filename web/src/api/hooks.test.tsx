@@ -16,12 +16,17 @@ const base = { id: 'i1', key: 'PAY-1', priority: 'P3', title: 'Original', versio
 function setup() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   qc.setQueryData(qk.item('i1'), base);
-  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  );
   return { qc, wrapper };
 }
 
 function respond(status: number, body: unknown) {
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(body), { status })));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response(JSON.stringify(body), { status })),
+  );
 }
 
 afterEach(() => vi.unstubAllGlobals());
@@ -32,7 +37,14 @@ describe('useItemMutation', () => {
     let release!: () => void;
     vi.stubGlobal(
       'fetch',
-      vi.fn(() => new Promise<Response>((r) => (release = () => r(new Response(JSON.stringify({ ...base, priority: 'P1', version: 4 }), { status: 200 }))))),
+      vi.fn(
+        () =>
+          new Promise<Response>(
+            (r) =>
+              (release = () =>
+                r(new Response(JSON.stringify({ ...base, priority: 'P1', version: 4 }), { status: 200 }))),
+          ),
+      ),
     );
     const { result } = renderHook(
       () =>

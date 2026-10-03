@@ -4,12 +4,33 @@ import { api, ApiError } from '../api/client';
 import { useItem, useItemMutation, useMe, useMembers } from '../api/hooks';
 import { PRIORITIES, type ItemDetail, type Priority, type Status } from '../api/types';
 import { Timeline } from '../components/Timeline';
-import { Avatar, Button, Card, DueBadge, ErrorState, Modal, PriorityBadge, Spinner, StatusBadge } from '../components/ui';
-import { fromLocalInput, fullDate, PRIORITY_LABEL, relativeTime, STATUS_LABEL, toLocalInput, transitionVerb, TYPE_LABEL } from '../lib/format';
+import {
+  Avatar,
+  Button,
+  Card,
+  DueBadge,
+  ErrorState,
+  Modal,
+  PriorityBadge,
+  Spinner,
+  StatusBadge,
+} from '../components/ui';
+import {
+  fromLocalInput,
+  fullDate,
+  PRIORITY_LABEL,
+  relativeTime,
+  STATUS_LABEL,
+  toLocalInput,
+  transitionVerb,
+  TYPE_LABEL,
+} from '../lib/format';
 import { onItemChange } from '../lib/live';
 import { nextStep } from '../lib/nextStep';
 
-type Patch = Partial<Pick<ItemDetail, 'title' | 'description' | 'priority' | 'requiresApproval'>> & { dueAt?: string | null };
+type Patch = Partial<Pick<ItemDetail, 'title' | 'description' | 'priority' | 'requiresApproval'>> & {
+  dueAt?: string | null;
+};
 
 interface ConflictState {
   patch: Patch;
@@ -32,8 +53,11 @@ export function ItemDetailPage() {
     () =>
       onItemChange((c) => {
         if (c.itemId !== id) return;
-        const who = members.data?.members.find((m) => m.id === c.actorId)?.name ?? (c.actorId ? 'Someone' : 'The system');
-        setLiveNotice(`${who} just ${c.event === 'COMMENTED' ? 'commented' : 'updated this item'} — you're seeing the latest version.`);
+        const who =
+          members.data?.members.find((m) => m.id === c.actorId)?.name ?? (c.actorId ? 'Someone' : 'The system');
+        setLiveNotice(
+          `${who} just ${c.event === 'COMMENTED' ? 'commented' : 'updated this item'} — you're seeing the latest version.`,
+        );
       }),
     [id, members.data],
   );
@@ -108,7 +132,12 @@ export function ItemDetailPage() {
   const assignable = (members.data?.members ?? []).filter((m) => m.role !== 'VIEWER');
 
   const runTransition = (to: Status) => {
-    const needsInput = to === 'BLOCKED' || to === 'CANCELLED' || to === 'RESOLVED' || (item.status === 'RESOLVED' && to === 'IN_PROGRESS') || to === 'PENDING_APPROVAL';
+    const needsInput =
+      to === 'BLOCKED' ||
+      to === 'CANCELLED' ||
+      to === 'RESOLVED' ||
+      (item.status === 'RESOLVED' && to === 'IN_PROGRESS') ||
+      to === 'PENDING_APPROVAL';
     if (needsInput) setTransition(to);
     else move.mutate({ to, version: item.version });
   };
@@ -124,9 +153,16 @@ export function ItemDetailPage() {
       </nav>
 
       {liveNotice && (
-        <div className="animate-slide-in mb-4 flex items-center justify-between gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800" role="status">
+        <div
+          className="animate-slide-in mb-4 flex items-center justify-between gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800"
+          role="status"
+        >
           <span>{liveNotice}</span>
-          <button className="text-blue-600 hover:text-blue-900" onClick={() => setLiveNotice(null)} aria-label="Dismiss">
+          <button
+            className="text-blue-600 hover:text-blue-900"
+            onClick={() => setLiveNotice(null)}
+            aria-label="Dismiss"
+          >
             ✕
           </button>
         </div>
@@ -168,12 +204,19 @@ export function ItemDetailPage() {
           {item.status === 'PENDING_APPROVAL' && item.pendingApproval && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
               <p className="text-sm font-medium text-amber-900">
-                Waiting for approval · requested by {item.pendingApproval.requestedBy.name} {relativeTime(item.pendingApproval.requestedAt)}
+                Waiting for approval · requested by {item.pendingApproval.requestedBy.name}{' '}
+                {relativeTime(item.pendingApproval.requestedAt)}
               </p>
-              {item.pendingApproval.note && <p className="mt-1 text-sm text-amber-800">“{item.pendingApproval.note}”</p>}
+              {item.pendingApproval.note && (
+                <p className="mt-1 text-sm text-amber-800">“{item.pendingApproval.note}”</p>
+              )}
               {p.decideApproval ? (
                 <div className="mt-3 flex gap-2">
-                  <Button variant="success" loading={decide.isPending} onClick={() => decide.mutate({ decision: 'APPROVED' })}>
+                  <Button
+                    variant="success"
+                    loading={decide.isPending}
+                    onClick={() => decide.mutate({ decision: 'APPROVED' })}
+                  >
                     Approve
                   </Button>
                   <Button variant="danger" disabled={decide.isPending} onClick={() => setRejecting(true)}>
@@ -195,7 +238,11 @@ export function ItemDetailPage() {
             </div>
           )}
 
-          <EditableDescription item={item} canEdit={p.edit} onSave={(description, version) => save({ description }, version)} />
+          <EditableDescription
+            item={item}
+            canEdit={p.edit}
+            onSave={(description, version) => save({ description }, version)}
+          />
           <Timeline itemId={item.id} canComment={p.comment} />
         </div>
 
@@ -244,7 +291,11 @@ export function ItemDetailPage() {
                     </Button>
                   )}
                   {p.unassign && item.owner?.id === me?.id && (
-                    <Button size="sm" disabled={busy} onClick={() => assign.mutate({ userId: null, version: item.version })}>
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={() => assign.mutate({ userId: null, version: item.version })}
+                    >
                       Release
                     </Button>
                   )}
@@ -274,7 +325,9 @@ export function ItemDetailPage() {
               </div>
 
               <div>
-                <label className="label" htmlFor="priority">Priority</label>
+                <label className="label" htmlFor="priority">
+                  Priority
+                </label>
                 {p.edit ? (
                   <select
                     id="priority"
@@ -295,7 +348,9 @@ export function ItemDetailPage() {
               </div>
 
               <div>
-                <label className="label" htmlFor="due">Due</label>
+                <label className="label" htmlFor="due">
+                  Due
+                </label>
                 {p.edit ? (
                   <input
                     id="due"
@@ -305,7 +360,8 @@ export function ItemDetailPage() {
                     key={item.dueAt ?? 'none'}
                     onBlur={(e) => {
                       const next = fromLocalInput(e.target.value);
-                      if ((next ?? null) !== (item.dueAt ? new Date(item.dueAt).toISOString() : null)) save({ dueAt: next });
+                      if ((next ?? null) !== (item.dueAt ? new Date(item.dueAt).toISOString() : null))
+                        save({ dueAt: next });
                     }}
                   />
                 ) : (
@@ -360,7 +416,11 @@ export function ItemDetailPage() {
                   {item.watcherCount} watcher{item.watcherCount === 1 ? '' : 's'}
                 </dt>
                 <dd>
-                  <Button size="sm" variant={item.watching ? 'secondary' : 'ghost'} onClick={() => watch.mutate(!item.watching)}>
+                  <Button
+                    size="sm"
+                    variant={item.watching ? 'secondary' : 'ghost'}
+                    onClick={() => watch.mutate(!item.watching)}
+                  >
                     {item.watching ? '👁 Watching' : 'Watch'}
                   </Button>
                 </dd>
@@ -407,7 +467,15 @@ export function ItemDetailPage() {
 
 // ───────────────────────── Sub-components ─────────────────────────
 
-function EditableTitle({ item, canEdit, onSave }: { item: ItemDetail; canEdit: boolean; onSave: (title: string, version: number) => void }) {
+function EditableTitle({
+  item,
+  canEdit,
+  onSave,
+}: {
+  item: ItemDetail;
+  canEdit: boolean;
+  onSave: (title: string, version: number) => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.title);
   // Remember which version the user started editing from, so a concurrent change is detected.
@@ -492,7 +560,13 @@ function EditableDescription({
                 Heads up: this item changed while you were editing. Saving will ask you to resolve the conflict.
               </p>
             )}
-            <textarea className="input min-h-40" value={draft} onChange={(e) => setDraft(e.target.value)} autoFocus aria-label="Description" />
+            <textarea
+              className="input min-h-40"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              autoFocus
+              aria-label="Description"
+            />
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
                 Cancel
@@ -566,9 +640,18 @@ function TransitionDialog({
         </>
       }
     >
-      <label className="label" htmlFor="transition-text">{prompt}</label>
-      <textarea id="transition-text" className="input min-h-24" value={text} onChange={(e) => setText(e.target.value)} />
-      {to === 'PENDING_APPROVAL' && <p className="mt-2 text-xs text-slate-500">Team leads will be notified. You cannot approve your own request.</p>}
+      <label className="label" htmlFor="transition-text">
+        {prompt}
+      </label>
+      <textarea
+        id="transition-text"
+        className="input min-h-24"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      {to === 'PENDING_APPROVAL' && (
+        <p className="mt-2 text-xs text-slate-500">Team leads will be notified. You cannot approve your own request.</p>
+      )}
     </Modal>
   );
 }
@@ -594,13 +677,20 @@ function ReasonDialog(props: {
           <Button variant="ghost" onClick={props.onClose}>
             Cancel
           </Button>
-          <Button variant="danger" loading={props.pending} disabled={!reason.trim()} onClick={() => props.onSubmit(reason)}>
+          <Button
+            variant="danger"
+            loading={props.pending}
+            disabled={!reason.trim()}
+            onClick={() => props.onSubmit(reason)}
+          >
             {props.confirm}
           </Button>
         </>
       }
     >
-      <label className="label" htmlFor="reason">{props.label}</label>
+      <label className="label" htmlFor="reason">
+        {props.label}
+      </label>
       <textarea id="reason" className="input min-h-24" value={reason} onChange={(e) => setReason(e.target.value)} />
     </Modal>
   );
@@ -627,7 +717,15 @@ function show(field: string, v: unknown): string {
  * The user sees exactly what differs and chooses: keep the other person's version,
  * or deliberately re-apply their own change on top of it.
  */
-function ConflictDialog({ conflict, onDiscard, onReapply }: { conflict: ConflictState; onDiscard: () => void; onReapply: () => void }) {
+function ConflictDialog({
+  conflict,
+  onDiscard,
+  onReapply,
+}: {
+  conflict: ConflictState;
+  onDiscard: () => void;
+  onReapply: () => void;
+}) {
   const { patch, theirs, lastChange } = conflict;
   return (
     <Modal
@@ -646,7 +744,8 @@ function ConflictDialog({ conflict, onDiscard, onReapply }: { conflict: Conflict
     >
       <p className="text-sm text-slate-600">
         {lastChange?.actor_name ?? 'Another user'} updated <span className="font-mono">{theirs.key}</span>
-        {lastChange?.created_at && ` ${relativeTime(lastChange.created_at)}`} while you were editing. Your change has <b>not</b> been saved.
+        {lastChange?.created_at && ` ${relativeTime(lastChange.created_at)}`} while you were editing. Your change has{' '}
+        <b>not</b> been saved.
       </p>
       <table className="mt-4 w-full text-sm">
         <thead>
@@ -667,7 +766,8 @@ function ConflictDialog({ conflict, onDiscard, onReapply }: { conflict: Conflict
         </tbody>
       </table>
       <p className="mt-3 text-xs text-slate-500">
-        Status is now <b>{STATUS_LABEL[theirs.status]}</b>, owner {theirs.owner?.name ?? 'unassigned'}, priority {theirs.priority}.
+        Status is now <b>{STATUS_LABEL[theirs.status]}</b>, owner {theirs.owner?.name ?? 'unassigned'}, priority{' '}
+        {theirs.priority}.
       </p>
     </Modal>
   );

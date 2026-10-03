@@ -74,13 +74,18 @@ export async function registerRoutes(app: FastifyInstance) {
   // ── Notifications ──
   app.get('/api/notifications', async (req) => {
     const q = z
-      .object({ before: z.coerce.number().int().positive().optional(), limit: z.coerce.number().int().min(1).max(50).default(20) })
+      .object({
+        before: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().min(1).max(50).default(20),
+      })
       .parse(req.query);
     return notifications.listNotifications(req.actor, q.before, q.limit);
   });
 
   app.post('/api/notifications/read', async (req) => {
-    const body = z.object({ ids: z.array(z.number().int()).max(500).optional(), all: z.boolean().optional() }).parse(req.body);
+    const body = z
+      .object({ ids: z.array(z.number().int()).max(500).optional(), all: z.boolean().optional() })
+      .parse(req.body);
     await notifications.markRead(req.actor, body.all ? 'all' : (body.ids ?? []));
     return { ok: true };
   });

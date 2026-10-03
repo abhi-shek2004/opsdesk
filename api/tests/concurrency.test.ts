@@ -23,7 +23,8 @@ describe('claiming work', () => {
     expect(owners.size).toBe(1); // a single owner, ever
     const winner = [...owners][0];
     for (const r of results) {
-      if (r.status === 200) expect(r.body.owner.id).toBe(winner); // winner's own retries are no-ops
+      if (r.status === 200)
+        expect(r.body.owner.id).toBe(winner); // winner's own retries are no-ops
       else {
         expect(r.status).toBe(409);
         expect(r.body.error.code).toBe('ALREADY_CLAIMED');
@@ -136,9 +137,10 @@ describe('approval races', () => {
     ]);
     const statuses = [p.status, a.status].sort();
     expect(statuses).toEqual([200, 409]);
-    const decided = await pool.query('SELECT count(*) AS n FROM approvals WHERE work_item_id = $1 AND decided_at IS NOT NULL', [
-      item.id,
-    ]);
+    const decided = await pool.query(
+      'SELECT count(*) AS n FROM approvals WHERE work_item_id = $1 AND decided_at IS NOT NULL',
+      [item.id],
+    );
     expect(decided.rows[0].n).toBe(1);
   });
 });
