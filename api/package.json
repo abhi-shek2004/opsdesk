@@ -8,10 +8,11 @@
     "seed": "tsx src/db/seed.ts",
     "dev": "tsx watch src/server.ts",
     "worker": "tsx watch src/jobs/run-worker.ts",
-    "start": "tsx src/server.ts",
-    "start:worker": "tsx src/jobs/run-worker.ts",
+    "start": "node --enable-source-maps dist/server.js",
+    "start:worker": "node --enable-source-maps dist/jobs/run-worker.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/db/migrations','dist/db/migrations',{recursive:true})\""
   },
   "license": "ISC",
   "type": "module",

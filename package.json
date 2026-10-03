@@ -10,7 +10,7 @@
     "seed": "npm run seed -w api",
     "test": "npm test -w api && npm test -w web",
     "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
-    "build": "npm run build -w web",
+    "build": "npm run build -w api && npm run build -w web",
     "start": "concurrently -k -n db,api,worker \"npm run db -w api\" \"npm run start -w api\" \"npm run start:worker -w api\"",
     "dev:external-db": "concurrently -k -n api,worker,web -c blue,magenta,green \"npm run dev -w api\" \"npm run worker -w api\" \"npm run dev -w web\"",
     "lint": "eslint .",
