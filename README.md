@@ -8,7 +8,8 @@ Customer issues, incidents, payment investigations, compliance requests and appr
 ### [▶ Open the live demo](https://opsdesk-gb7f.onrender.com)
 
 [![Live demo](https://img.shields.io/badge/live%20demo-opsdesk--gb7f.onrender.com-4f46e5?style=for-the-badge)](https://opsdesk-gb7f.onrender.com)
-![Tests](https://img.shields.io/badge/tests-56%20passing-16a34a?style=for-the-badge)
+[![CI](https://img.shields.io/github/actions/workflow/status/abhi-shek2004/opsdesk/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/abhi-shek2004/opsdesk/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/tests-57%20passing-16a34a?style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 
@@ -83,7 +84,8 @@ Sign in with any of the demo accounts above.
 Other commands:
 
 ```bash
-npm test             # 48 API tests (real Postgres) + 8 frontend tests
+npm test             # 49 API tests (real Postgres) + 8 frontend tests
+npm run lint         # ESLint (zero warnings) · npm run format:check for Prettier
 npm run typecheck
 npm run seed         # wipe and re-seed demo data (stop `npm run dev` first or run alongside)
 npm run build && npm start   # production build served by the API on :4000
@@ -196,12 +198,14 @@ The tests target the behaviours that would be most dangerous if wrong, and they 
 
 | File | What it proves |
 |---|---|
-| `api/tests/concurrency.test.ts` | 12 parallel claims → exactly 1 owner and 1 history entry; N parallel edits from one version → exactly 1 applied; idempotent create under 8 concurrent duplicates → 1 item; key reuse with a different body → 422; simultaneous approve and reject → one decision; 15 concurrent creates → unique, gap-free keys |
+| `api/tests/concurrency.test.ts` | a burst of 50 mixed concurrent operations on one item (no lost update, no gap, no 5xx); 12 parallel claims → exactly 1 owner and 1 history entry; N parallel edits from one version → exactly 1 applied; idempotent create under 8 concurrent duplicates → 1 item; key reuse with a different body → 422; simultaneous approve and reject → one decision; 15 concurrent creates → unique, gap-free keys |
 | `api/tests/authorization.test.ts` | 401s, login lockout after repeated failures, logout and team removal take effect on the very next request, CSRF header, cross-team 404s, list/search isolation, viewer limits, member-vs-lead rules, assignees must be team members, **no self-approval (even admin)**, members can't waive approval, notifications are private |
 | `api/tests/workflow.test.ts` | demo data never marks work overdue before its due date; every illegal transition rejected; approval gating; reasons required; reopen revokes approval; full lifecycle produces exact history; failed writes leave no events or jobs; DB constraint backstop; pagination visits every item exactly once; key and prefix search |
 | `api/tests/jobs.test.ts` | fan-out recipients; re-delivery doesn't double-notify; backoff then dead-letter without blocking other jobs; partial writes of a failed job roll back; 4 concurrent workers never double-process; SLA scan flags exactly once |
 | `web/src/api/hooks.test.tsx` | optimistic update → server result; rollback on 403; conflict adopts server copy and returns the user's change |
 | `web/src/lib/nextStep.test.ts` | the per-item "Next:" guidance (owner needed, approval needed, overdue, decision needed) |
+
+**CI:** every push runs ESLint, Prettier, type-check, all tests and the production build on Linux with Node 20 and 22, plus the API tests against a standard PostgreSQL server ([workflow](.github/workflows/ci.yml)).
 
 To check that the tests actually catch bugs, I removed the row lock (the claim-race and concurrent-edit tests fail) and removed the identity-cache invalidation (the access-revocation test fails).
 
